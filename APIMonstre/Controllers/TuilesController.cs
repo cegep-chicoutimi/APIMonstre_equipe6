@@ -99,7 +99,7 @@ namespace APIMonstre.Controllers
         }
 
         // DELETE: api/Tuiles/5
-        [HttpDelete("{id}")]
+        /**[HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTuile(int id)
         {
             var tuile = await _context.Tuile.FindAsync(id);
@@ -112,7 +112,7 @@ namespace APIMonstre.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
+        }**/
 
         private bool TuileExists(int id)
         {
