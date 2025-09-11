@@ -27,9 +27,12 @@ namespace APIMonstre.Controllers
         [HttpGet("{x}/{y}")]
         public async Task<ActionResult<Tuile>> GetTuile(int x, int y)
         {
-            var tuile = await _context.Tuile.Where(t => t.PositionX == x && t.PositionY == y).FirstOrDefaultAsync();
+            if (x < 0 || x >= 50 || y < 0 || y >= 50)
+            {
+                return BadRequest("Les coordonnées doivent être comprises entre 0 et 49 (monde 50x50).");
+            }
 
-            
+            var tuile = await _context.Tuile.Where(t => t.PositionX == x && t.PositionY == y).FirstOrDefaultAsync();
 
             if (tuile == null)
             {
