@@ -1,6 +1,6 @@
 ﻿namespace APIMonstre.Models
 {
-    public class Tuile()
+    public class Tuile
     {
         public int PositionX { get; set; }
         public int PositionY { get; set; }
@@ -8,5 +8,13 @@
         public bool EstTraversable { get; set; }
         public string ImageURL { get; set; }
 
+        public Tuile(int positionX, int positionY, int type, bool estTraversable, string imageURL)
+        {
+            PositionX = positionX;
+            PositionY = positionY;
+            Type = type;
+            EstTraversable = estTraversable;
+            ImageURL = imageURL;
+        }
     }
 }

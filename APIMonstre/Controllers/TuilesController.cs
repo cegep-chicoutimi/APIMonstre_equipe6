@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using APIMonstre.Data.Context;
 using APIMonstre.Models;
@@ -29,18 +24,20 @@ namespace APIMonstre.Controllers
         }
 
         // GET: api/Tuiles/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Tuile>> GetTuile(int id)
+        [HttpGet("{x}/{y}")]
+        public async Task<ActionResult<Tuile>> GetTuile(int x, int y)
         {
-            var tuile = await _context.Tuile.FindAsync(id);
+            var tuile = await _context.Tuile.Where(t => t.PositionX == x && t.PositionY == y).FirstAsync();
 
             if (tuile == null)
             {
-                return NotFound();
+                tuile = TuileGenerator.GenerateTuile(x, y); 
             }
 
             return tuile;
         }
+
+        
 
         // PUT: api/Tuiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

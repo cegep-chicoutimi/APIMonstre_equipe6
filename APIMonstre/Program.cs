@@ -4,6 +4,14 @@ using APIMonstre.Data.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(opt => {
+    opt.AddPolicy("CorsPolicy", policyBuilder =>
+    {
+        policyBuilder.AllowAnyHeader().AllowAnyMethod().WithOrigins("*");
+
+    });
+});
+
 builder.Services.AddDbContext<MonstreContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("Default");
@@ -28,6 +36,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
