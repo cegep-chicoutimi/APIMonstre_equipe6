@@ -37,7 +37,10 @@ namespace APIMonstre.Controllers
             if (tuile == null)
             {
                 var tuilesList = await GetTuileAdjacentes(x, y);
-                tuile = TuileService.GenerateTuile(x, y, tuilesList); 
+                tuile = TuileService.GenerateTuile(x, y, tuilesList);
+
+                _context.Tuile.Add(tuile);
+                await _context.SaveChangesAsync();
             }
 
             return tuile;
