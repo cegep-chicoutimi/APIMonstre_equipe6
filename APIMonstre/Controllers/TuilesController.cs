@@ -27,17 +27,33 @@ namespace APIMonstre.Controllers
         [HttpGet("{x}/{y}")]
         public async Task<ActionResult<Tuile>> GetTuile(int x, int y)
         {
-            var tuile = await _context.Tuile.Where(t => t.PositionX == x && t.PositionY == y).FirstAsync();
+            var tuile = await _context.Tuile.Where(t => t.PositionX == x && t.PositionY == y).FirstOrDefaultAsync();
+
+            
 
             if (tuile == null)
             {
-                tuile = TuileGenerator.GenerateTuile(x, y); 
+                var tuilesList = await GetTuileAdjacentes(x, y);
+                tuile = TuileService.GenerateTuile(x, y, tuilesList); 
             }
 
             return tuile;
         }
 
-        
+        private async Task<List<Tuile>> GetTuileAdjacentes(int x, int y)
+        {
+            var list = await _context.Tuile
+                .Where(t =>
+                    (t.PositionX == x - 1 && t.PositionY == y) ||
+                    (t.PositionX == x + 1 && t.PositionY == y) ||
+                    (t.PositionX == x && t.PositionY == y - 1) ||
+                    (t.PositionX == x && t.PositionY == y + 1))
+                .ToListAsync();
+
+            return list ?? new List<Tuile>();
+        }
+
+
 
         // PUT: api/Tuiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
