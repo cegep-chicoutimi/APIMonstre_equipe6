@@ -11,8 +11,6 @@
         public int ExperienceBase { get; set; }
         public string SpriteURL { get; set; } = string.Empty;
         public string Type1 { get; set; } = string.Empty;
-        public string Type2 { get; set; } = string.Empty;
-
-
+        public string? Type2 { get; set; } = string.Empty;
     }
 }

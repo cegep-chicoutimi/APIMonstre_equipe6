@@ -23,6 +23,19 @@ namespace APIMonstre.Controllers
             return await _context.Tuile.ToListAsync();
         }
 
+        [HttpGet]
+        [Route("/list")]
+        public async Task<ActionResult<Tuile[]>> GetTuiles([FromBody] int[][] coords)
+        {
+            var tuiles = new List<Tuile>();
+            for (int i = 0; i < coords.Length; i++)
+            {
+                tuiles = await _context.Tuile.Where(t => t.PositionX == coords[i][0] && t.PositionY == coords[i][1]).ToListAsync();
+            }
+
+            return tuiles.ToArray();
+        }
+
         // GET: api/Tuiles/5
         [HttpGet("{x}/{y}")]
         public async Task<ActionResult<Tuile>> GetTuile(int x, int y)
