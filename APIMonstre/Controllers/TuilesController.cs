@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using APIMonstre.Data.Context;
+﻿using APIMonstre.Data.Context;
 using APIMonstre.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace APIMonstre.Controllers
 {
@@ -23,19 +24,18 @@ namespace APIMonstre.Controllers
             return await _context.Tuile.ToListAsync();
         }
 
-        //Ca marche pas 
-        //[HttpGet]
-        //[Route("/list")]
-        //public async Task<ActionResult<Tuile[]>> GetTuiles([FromBody] int[][] coords)
-        //{
-        //    var tuiles = new List<Tuile>();
-        //    for (int i = 0; i < coords.Length; i++)
-        //    {
-        //        tuiles = await _context.Tuile.Where(t => t.PositionX == coords[i][0] && t.PositionY == coords[i][1]).ToListAsync();
-        //    }
+        [HttpPost]
+        [Route("list")]
+        public async Task<ActionResult<Tuile[]>> GetTuiles([FromBody] int[][] coords)
+        {
+            var tuiles = new List<Tuile>();
+            for(int i = 0; i < coords.Length; i++)
+            {
+                tuiles.AddRange(await _context.Tuile.Where(t => t.PositionX == coords[i][0] && t.PositionY == coords[i][1]).ToListAsync());
+            }
 
-        //    return tuiles.ToArray();
-        //}
+            return tuiles.ToArray();
+        }
 
         // GET: api/Tuiles/5
         [HttpGet("{x}/{y}")]
