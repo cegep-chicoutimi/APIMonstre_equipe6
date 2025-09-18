@@ -4,6 +4,7 @@ using APIMonstre.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIMonstre.Migrations
 {
     [DbContext(typeof(MonstreContext))]
-    partial class MonstreContextModelSnapshot : ModelSnapshot
+    [Migration("20250918130501_Users")]
+    partial class Users
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,10 +111,13 @@ namespace APIMonstre.Migrations
                     b.Property<int>("PositionY")
                         .HasColumnType("int");
 
+                    b.Property<int>("UtilisateurIdUtilisateur")
+                        .HasColumnType("int");
+
                     b.HasKey("IdPersonnage")
                         .HasName("PrimaryKey_PersonnageId");
 
-                    b.HasIndex("IdUtilisateur");
+                    b.HasIndex("UtilisateurIdUtilisateur");
 
                     b.ToTable("Personnage");
                 });
@@ -163,9 +169,6 @@ namespace APIMonstre.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("estConnecte")
-                        .HasColumnType("tinyint(1)");
-
                     b.HasKey("IdUtilisateur")
                         .HasName("PrimaryKey_UtilisateurId");
 
@@ -176,7 +179,7 @@ namespace APIMonstre.Migrations
                 {
                     b.HasOne("APIMonstre.Models.Utilisateur", "Utilisateur")
                         .WithMany()
-                        .HasForeignKey("IdUtilisateur")
+                        .HasForeignKey("UtilisateurIdUtilisateur")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

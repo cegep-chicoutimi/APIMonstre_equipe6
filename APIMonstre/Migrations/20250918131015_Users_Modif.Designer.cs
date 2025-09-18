@@ -4,6 +4,7 @@ using APIMonstre.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIMonstre.Migrations
 {
     [DbContext(typeof(MonstreContext))]
-    partial class MonstreContextModelSnapshot : ModelSnapshot
+    [Migration("20250918131015_Users_Modif")]
+    partial class Users_Modif
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,8 +114,6 @@ namespace APIMonstre.Migrations
                     b.HasKey("IdPersonnage")
                         .HasName("PrimaryKey_PersonnageId");
 
-                    b.HasIndex("IdUtilisateur");
-
                     b.ToTable("Personnage");
                 });
 
@@ -163,24 +164,10 @@ namespace APIMonstre.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("estConnecte")
-                        .HasColumnType("tinyint(1)");
-
                     b.HasKey("IdUtilisateur")
                         .HasName("PrimaryKey_UtilisateurId");
 
                     b.ToTable("Utilisateur");
-                });
-
-            modelBuilder.Entity("APIMonstre.Models.Personnage", b =>
-                {
-                    b.HasOne("APIMonstre.Models.Utilisateur", "Utilisateur")
-                        .WithMany()
-                        .HasForeignKey("IdUtilisateur")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Utilisateur");
                 });
 #pragma warning restore 612, 618
         }

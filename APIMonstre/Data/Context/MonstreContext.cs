@@ -7,6 +7,8 @@ namespace APIMonstre.Data.Context
     {
         public DbSet<Monster> Monster { get; set; }
         public DbSet<Tuile> Tuile { get; set; }
+        public DbSet<Utilisateur> Utilisateur { get; set; }
+        public DbSet<Personnage> Personnage { get; set; }
 
         public MonstreContext(DbContextOptions<MonstreContext> options) : base(options)
         {
@@ -17,6 +19,9 @@ namespace APIMonstre.Data.Context
             modelBuilder.Entity<Monster>()
                 .HasKey(m => m.IdMonster)
                 .HasName("PrimaryKey_MonsterId");
+            modelBuilder.Entity<Utilisateur>().HasKey(u => u.IdUtilisateur).HasName("PrimaryKey_UtilisateurId");
+
+            modelBuilder.Entity<Personnage>().HasKey(p => p.IdPersonnage).HasName("PrimaryKey_PersonnageId");
 
             modelBuilder.Entity<Tuile>()
                 .HasKey(pk => new { pk.PositionX, pk.PositionY });
