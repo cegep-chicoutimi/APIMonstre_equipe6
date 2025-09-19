@@ -23,17 +23,23 @@ namespace APIMonstre.Controllers
 
         [HttpGet]
         [Route("{idPersonnage}/{direction}")]
-        public async Task<ActionResult<(int, int)>> DeplacerPersonnage(int idPersonnage, string direction)
+        public async Task<ActionResult<int[]>> DeplacerPersonnage(int idPersonnage, string direction)
         {
             var personnage = await _context.Personnage.FindAsync(idPersonnage);
             if(personnage == null)
             {
                 return NotFound();
             }
+            Tuile tuile;
             switch (direction)
             {
                 case "up":
                     if(personnage.PositionX - 1 < 0)
+                    {
+                        return BadRequest();
+                    }
+                    tuile = new TuilesController(_context).GetTuile(personnage.PositionX - 1, personnage.PositionY).Result.Value;
+                    if (!tuile.EstTraversable)
                     {
                         return BadRequest();
                     }
@@ -45,6 +51,11 @@ namespace APIMonstre.Controllers
                     {
                         return BadRequest();
                     }
+                    tuile = new TuilesController(_context).GetTuile(personnage.PositionX + 1, personnage.PositionY).Result.Value;
+                    if (!tuile.EstTraversable)
+                    {
+                        return BadRequest();
+                    }
                     personnage.PositionX += 1 ;
                     break;
 
@@ -53,11 +64,21 @@ namespace APIMonstre.Controllers
                     {
                         return BadRequest();
                     }
+                    tuile = new TuilesController(_context).GetTuile(personnage.PositionX, personnage.PositionY - 1).Result.Value;
+                    if (!tuile.EstTraversable)
+                    {
+                        return BadRequest();
+                    }
                     personnage.PositionY -= 1 ;
                     break;
 
                 case "right":
                     if(personnage.PositionY + 1 > 49)
+                    {
+                        return BadRequest();
+                    }
+                    tuile = new TuilesController(_context).GetTuile(personnage.PositionX, personnage.PositionY + 1).Result.Value;
+                    if (!tuile.EstTraversable)
                     {
                         return BadRequest();
                     }
@@ -86,87 +107,88 @@ namespace APIMonstre.Controllers
                 }
             }
             
-            return (personnage.PositionX, personnage.PositionY);
+            return new int[] { personnage.PositionX, personnage.PositionY};
         }
 
         // GET: api/Personnages
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Personnage>>> GetPersonnage()
+        [Route("{idUtilisateur}")]
+        public async Task<ActionResult<IEnumerable<Personnage>>> GetPersonnages(int idUtilisateur)
         {
-            return await _context.Personnage.ToListAsync();
+            return await _context.Personnage.Where(p => p.IdUtilisateur == idUtilisateur).ToListAsync();
         }
 
         // GET: api/Personnages/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Personnage>> GetPersonnage(int id)
-        {
-            var personnage = await _context.Personnage.FindAsync(id);
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<Personnage>> GetPersonnage(int id)
+        //{
+        //    var personnage = await _context.Personnage.FindAsync(id);
 
-            if (personnage == null)
-            {
-                return NotFound();
-            }
+        //    if (personnage == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return personnage;
-        }
+        //    return personnage;
+        //}
 
         // PUT: api/Personnages/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPersonnage(int id, Personnage personnage)
-        {
-            if (id != personnage.IdPersonnage)
-            {
-                return BadRequest();
-            }
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutPersonnage(int id, Personnage personnage)
+        //{
+        //    if (id != personnage.IdPersonnage)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            _context.Entry(personnage).State = EntityState.Modified;
+        //    _context.Entry(personnage).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PersonnageExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!PersonnageExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         // POST: api/Personnages
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Personnage>> PostPersonnage(Personnage personnage)
-        {
-            _context.Personnage.Add(personnage);
-            await _context.SaveChangesAsync();
+        //[HttpPost]
+        //public async Task<ActionResult<Personnage>> PostPersonnage(Personnage personnage)
+        //{
+        //    _context.Personnage.Add(personnage);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPersonnage", new { id = personnage.IdPersonnage }, personnage);
-        }
+        //    return CreatedAtAction("GetPersonnage", new { id = personnage.IdPersonnage }, personnage);
+        //}
 
         // DELETE: api/Personnages/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePersonnage(int id)
-        {
-            var personnage = await _context.Personnage.FindAsync(id);
-            if (personnage == null)
-            {
-                return NotFound();
-            }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeletePersonnage(int id)
+        //{
+        //    var personnage = await _context.Personnage.FindAsync(id);
+        //    if (personnage == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Personnage.Remove(personnage);
-            await _context.SaveChangesAsync();
+        //    _context.Personnage.Remove(personnage);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         private bool PersonnageExists(int id)
         {

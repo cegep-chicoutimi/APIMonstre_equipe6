@@ -25,16 +25,42 @@ namespace APIMonstre.Controllers
         }
 
         [HttpPost]
-        [Route("list")]
+        [Route("explorer")]
         public async Task<ActionResult<Tuile[]>> GetTuiles([FromBody] int[][] coords)
         {
             var tuiles = new List<Tuile>();
+            if(coords.Length > 9)
+            {
+                return Forbid();
+            }
+            if (!AllCoordsAdjacent(coords))
+            {
+
+            }
+
             for(int i = 0; i < coords.Length; i++)
             {
                 tuiles.AddRange(await _context.Tuile.Where(t => t.PositionX == coords[i][0] && t.PositionY == coords[i][1]).ToListAsync());
             }
 
             return tuiles.ToArray();
+        }
+
+        private bool AllCoordsAdjacent(int[][] coords)
+        {
+            for (int i = 1; i < coords.Length; i++)
+            {
+                if (!AreAdjacent(coords[i - 1], coords[i]))
+                    return false;
+            }
+            return true;
+        }
+
+        private bool AreAdjacent(int[] coord1, int[] coord2)
+        {
+            int dx = Math.Abs(coord1[0] - coord2[0]);
+            int dy = Math.Abs(coord1[1] - coord2[1]);
+            return Math.Max(dx, dy) == 1;
         }
 
         // GET: api/Tuiles/5
