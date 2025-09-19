@@ -20,23 +20,19 @@ namespace APIMonstre.Models
         public Utilisateur Utilisateur { get; set; }
         
 
-        public Personnage() { }
 
-        public Personnage(int idPersonnage, string nom, int niveau, int experience, int pointsVie, int pointsVieMax, 
-            int force, int defense, int positionX, int positionY, int idUtilisateur, DateTime dateCreation)
+        public Personnage(int idUtilisateur)
         {
-            IdPersonnage = idPersonnage;
-            Nom = nom;
-            Niveau = niveau;
-            Experience = experience;
-            PointsVie = pointsVie;
-            PointsVieMax = pointsVieMax;
-            Force = force;
-            Defense = defense;
-            PositionX = positionX;
-            PositionY = positionY;
+            Niveau = 1;
+            Experience = 0;
+            PointsVie = 100;
+            PointsVieMax = 100;
+            Force = new Random().Next(1, 11);
+            Defense = new Random().Next(1, 11);
+            PositionX = new Random().Next(2, 48);
+            PositionY = new Random().Next(2, 48);
+            DateCreation = DateTime.Now;
             IdUtilisateur = idUtilisateur;
-            DateCreation = dateCreation;
         }
     }
 }

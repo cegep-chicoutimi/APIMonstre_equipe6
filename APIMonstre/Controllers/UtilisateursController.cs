@@ -34,6 +34,9 @@ namespace APIMonstre.Controllers
             Utilisateur utilisateur = new Utilisateur() { Email = request.Email, Pseudo = request.Pseudo, MotDePasse = request.Password, DateInscription = DateTime.Now };
             _context.Add(utilisateur);
             await _context.SaveChangesAsync();
+            utilisateur = await _context.Utilisateur.FirstOrDefaultAsync(_ => _.Email == request.Email);
+            _context.Add(new Personnage(utilisateur.IdUtilisateur));
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUtilisateur", new { id = utilisateur.IdUtilisateur }, utilisateur);
         }
