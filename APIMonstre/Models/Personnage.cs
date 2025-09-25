@@ -19,8 +19,6 @@ namespace APIMonstre.Models
         public int IdUtilisateur { get; set; }
         public Utilisateur Utilisateur { get; set; }
         
-
-
         public Personnage(int idUtilisateur)
         {
             Niveau = 1;
