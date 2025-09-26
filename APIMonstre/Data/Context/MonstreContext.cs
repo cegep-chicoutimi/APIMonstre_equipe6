@@ -32,10 +32,21 @@ namespace APIMonstre.Data.Context
                 .HasColumnType("varchar")
                 .HasMaxLength(150);
 
-            modelBuilder.Entity<InstanceMonstre>().HasKey(m => m.MonstreId).HasName("ForeignKey_MonstreId");
-            modelBuilder.Entity<InstanceMonstre>().HasKey(t => t.PositionX).HasName("ForeignKey_TuileX");
-            modelBuilder.Entity<InstanceMonstre>().HasKey(t => t.PositionY).HasName("ForeignKey_TuileY");
+            modelBuilder.Entity<InstanceMonstre>()
+               .HasKey(im => new { im.PositionX, im.PositionY });
 
+            // Configure the relationship between InstanceMonstre and Tuile
+            modelBuilder.Entity<InstanceMonstre>()
+                .HasOne(im => im.Tuile)
+                .WithMany() // or WithOne() if it's one-to-one
+                .HasForeignKey(im => new { im.PositionX, im.PositionY })
+                .HasPrincipalKey(t => new { t.PositionX, t.PositionY });
+
+            // Configure the relationship between InstanceMonstre and Monster
+            modelBuilder.Entity<InstanceMonstre>()
+                .HasOne(im => im.Monstre)
+                .WithMany()
+                .HasForeignKey("MonstreId"); // Assuming you'll add a MonstreId property
         }
     }
 }

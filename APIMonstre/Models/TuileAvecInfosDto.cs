@@ -18,8 +18,8 @@
                 PositionY = tuile.PositionY,
                 Type = tuile.Type,
                 EstTraversable = tuile.EstTraversable,
-                EstVille = tuile.EstVille,
-                Monstre = monstre != null ? ConvertirInstanceMonstreVersDto(monstre) : null
+                //EstVille = tuile.EstVille,
+                //Monstre = monstre != null ? ConvertirInstanceMonstreVersDto(monstre) : null
             };
         }
     }

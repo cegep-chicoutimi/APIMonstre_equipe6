@@ -27,7 +27,6 @@
         {
             return new InstanceMonstreDto
             {
-                Id = instanceMonstre.Id,
                 MonstreId = instanceMonstre.MonstreId,
                 Nom = instanceMonstre.Monstre.Name,
                 SpriteUrl = instanceMonstre.Monstre.SpriteURL,

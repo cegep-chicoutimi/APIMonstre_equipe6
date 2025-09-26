@@ -8,6 +8,8 @@
         public bool EstTraversable { get; set; }
         public string ImageURL { get; set; }
 
+        public Tuile() { }
+
         public Tuile(int positionX, int positionY, int type, bool estTraversable, string imageURL)
         {
             PositionX = positionX;
