@@ -18,6 +18,7 @@ builder.Services.AddDbContext<MonstreContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("Default");
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
+
 builder.Services.AddHostedService<MonstreMaintenanceService>();
 // Add services to the container.
 builder.Services.AddControllers();

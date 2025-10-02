@@ -46,21 +46,35 @@ namespace APIMonstre.Controllers
             return tuiles.ToArray();
         }
 
+        //Comprends rien
         private bool AllCoordsAdjacent(int[][] coords)
         {
-            for (int i = 1; i < coords.Length; i++)
-            {
-                if (!AreAdjacent(coords[i - 1], coords[i]))
-                    return false;
-            }
-            return true;
-        }
+            var set = new HashSet<(int x, int y)>(coords.Select(c => (c[0], c[1])));
+            var visited = new HashSet<(int x, int y)>();
+            var stack = new Stack<(int x, int y)>();
+            stack.Push((coords[0][0], coords[0][1]));
+            visited.Add((coords[0][0], coords[0][1]));
 
-        private bool AreAdjacent(int[] coord1, int[] coord2)
-        {
-            int dx = Math.Abs(coord1[0] - coord2[0]);
-            int dy = Math.Abs(coord1[1] - coord2[1]);
-            return Math.Max(dx, dy) == 1;
+            // Directions possibles (8 directions : N, NE, E, SE, S, SW, W, NW)
+            int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
+            int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                for (int d = 0; d < 8; d++)
+                {
+                    var neighbor = (current.x + dx[d], current.y + dy[d]);
+                    if (set.Contains(neighbor) && !visited.Contains(neighbor))
+                    {
+                        visited.Add(neighbor);
+                        stack.Push(neighbor);
+                    }
+                }
+            }
+
+            // Si toutes les cases sont visitées, elles sont connectées en “L” ou autre
+            return visited.Count == set.Count;
         }
 
         // GET: api/Tuiles/5

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using APIMonstre.Data.Context;
 using APIMonstre.Models;
+using APIMonstre.Models.Dto;
 
 namespace APIMonstre.Controllers
 {
@@ -23,7 +24,7 @@ namespace APIMonstre.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<ActionResult<Utilisateur>> Register([FromBody] RegisterRequestDto request)
+        public async Task<ActionResult<Utilisateur>> Register([FromBody] DTO.RegisterRequestDto request)
         {
             var existingUtilisateur = await _context.Utilisateur.FirstOrDefaultAsync(u => u.Email == request.Email);
 
@@ -43,7 +44,7 @@ namespace APIMonstre.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult<Utilisateur>> Login([FromBody] LoginRequestDto request)
+        public async Task<ActionResult<Utilisateur>> Login([FromBody] DTO.LoginRequestDto request)
         {
             var existingUtilisateur = await _context.Utilisateur.FirstOrDefaultAsync(u => u.Email == request.Email && u.MotDePasse == request.Password);
 
@@ -75,7 +76,7 @@ namespace APIMonstre.Controllers
 
         [HttpPost]
         [Route("logout")]
-        public async Task<ActionResult> Logout([FromBody] LoginRequestDto request)
+        public async Task<ActionResult> Logout([FromBody] DTO.LoginRequestDto request)
         {
             var existingUtilisateur = await _context.Utilisateur.FirstOrDefaultAsync(u => u.Email == request.Email && u.MotDePasse == request.Password);
 

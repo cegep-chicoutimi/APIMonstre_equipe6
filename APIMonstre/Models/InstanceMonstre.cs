@@ -15,21 +15,22 @@ namespace APIMonstre.Models
         public int PointsVieMax { get; set; }
         public int PointsVieActuels { get; set; }
 
+        public InstanceMonstre(Tuile tuile, Monster monster, int niveau)
+        {
+            Tuile = tuile;
+            Monstre = monster;
+            Niveau = niveau;
+            PointsVieMax = monster.PointsVieBase + niveau;
+            PointsVieActuels = PointsVieMax;
+        }
+
         public int CalculerAttaque()
         {
-            return 0;
+            return Monstre.ForceBase + Niveau;
         }
         public int CalculerDefense()
         {
-            return 0;
-        }
-        public int CalculerVitesse()
-        {
-            return 0;
-        }
-        public int CalculerPointsVieMax()
-        {
-            return 0;
+            return Monstre.DefenseBase + Niveau;
         }
     }
 }
