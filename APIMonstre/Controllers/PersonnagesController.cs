@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using APIMonstre.Data.Context;
 using APIMonstre.Models;
+using APIMonstre.Models.Dto;
 
 namespace APIMonstre.Controllers
 {
@@ -30,7 +31,7 @@ namespace APIMonstre.Controllers
             {
                 return NotFound();
             }
-            Tuile tuile;
+            TuileAvecInfosDto tuile;
             switch (direction)
             {
                 case "up":
@@ -39,7 +40,7 @@ namespace APIMonstre.Controllers
                         return BadRequest();
                     }
                     tuile = new TuilesController(_context).GetTuile(personnage.PositionX - 1, personnage.PositionY).Result.Value;
-                    if (!tuile.EstTraversable)
+                    if (!tuile.EstAccessible)
                     {
                         return BadRequest();
                     }
@@ -52,7 +53,7 @@ namespace APIMonstre.Controllers
                         return BadRequest();
                     }
                     tuile = new TuilesController(_context).GetTuile(personnage.PositionX + 1, personnage.PositionY).Result.Value;
-                    if (!tuile.EstTraversable)
+                    if (!tuile.EstAccessible)
                     {
                         return BadRequest();
                     }
@@ -65,7 +66,7 @@ namespace APIMonstre.Controllers
                         return BadRequest();
                     }
                     tuile = new TuilesController(_context).GetTuile(personnage.PositionX, personnage.PositionY - 1).Result.Value;
-                    if (!tuile.EstTraversable)
+                    if (!tuile.EstAccessible)
                     {
                         return BadRequest();
                     }
@@ -78,7 +79,7 @@ namespace APIMonstre.Controllers
                         return BadRequest();
                     }
                     tuile = new TuilesController(_context).GetTuile(personnage.PositionX, personnage.PositionY + 1).Result.Value;
-                    if (!tuile.EstTraversable)
+                    if (!tuile.EstAccessible)
                     {
                         return BadRequest();
                     }

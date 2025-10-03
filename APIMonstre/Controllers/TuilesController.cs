@@ -3,6 +3,7 @@ using APIMonstre.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using APIMonstre.Models.Dto;
 
 namespace APIMonstre.Controllers
 {
@@ -26,24 +27,29 @@ namespace APIMonstre.Controllers
 
         [HttpPost]
         [Route("explorer")]
-        public async Task<ActionResult<Tuile[]>> GetTuiles([FromBody] int[][] coords)
+        public async Task<ActionResult<TuileAvecInfosDto[]>> GetTuiles([FromBody] int[][] coords)
         {
             var tuiles = new List<Tuile>();
+            var tuilesDto = new List<TuileAvecInfosDto>();
             if(coords.Length > 9)
             {
                 return Forbid();
             }
             if (!AllCoordsAdjacent(coords))
             {
-
+                return BadRequest();
             }
 
             for(int i = 0; i < coords.Length; i++)
             {
                 tuiles.AddRange(await _context.Tuile.Where(t => t.PositionX == coords[i][0] && t.PositionY == coords[i][1]).ToListAsync());
             }
+            foreach(Tuile tuile in tuiles)
+            {
+                tuilesDto.Add(TuileAvecInfosDto.ConvertirTuileVersDto(tuile, _context));
+            }
 
-            return tuiles.ToArray();
+            return tuilesDto.ToArray();
         }
 
         //Comprends rien
@@ -79,7 +85,7 @@ namespace APIMonstre.Controllers
 
         // GET: api/Tuiles/5
         [HttpGet("{x}/{y}")]
-        public async Task<ActionResult<Tuile>> GetTuile(int x, int y)
+        public async Task<ActionResult<TuileAvecInfosDto>> GetTuile(int x, int y)
         {
             if (x < 0 || x >= 50 || y < 0 || y >= 50)
             {
@@ -97,7 +103,7 @@ namespace APIMonstre.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return tuile;
+            return TuileAvecInfosDto.ConvertirTuileVersDto(tuile, _context);
         }
 
         private async Task<List<Tuile>> GetTuileAdjacentes(int x, int y)
