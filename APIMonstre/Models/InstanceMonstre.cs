@@ -15,6 +15,7 @@ namespace APIMonstre.Models
         public int PointsVieMax { get; set; }
         public int PointsVieActuels { get; set; }
 
+        public InstanceMonstre() { }
         public InstanceMonstre(Tuile tuile, Monster monster, int niveau)
         {
             Tuile = tuile;

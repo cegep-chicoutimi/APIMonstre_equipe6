@@ -4,7 +4,7 @@ using APIMonstre.Data.Context;
 using APIMonstre.Migrations;
 using APIMonstre.Models;
 
-namespace MyLittleRPG.Services
+namespace APIMonstre.Services
 {
     public class MonstreMaintenanceService : BackgroundService
     {
@@ -71,7 +71,7 @@ namespace MyLittleRPG.Services
                 }
 
                 //Get le level
-                int level = distancePP / 2;
+                int level = distancePP;
 
                 //Créer l'instance
                 context.Add(new InstanceMonstre(spawnTuile, monstre, level));

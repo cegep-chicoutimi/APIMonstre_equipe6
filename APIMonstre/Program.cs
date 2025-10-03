@@ -1,6 +1,6 @@
 using APIMonstre.Data.Context;
 using Microsoft.EntityFrameworkCore;
-using MyLittleRPG.Services;
+using APIMonstre.Services;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +20,7 @@ builder.Services.AddDbContext<MonstreContext>(options =>
 });
 
 builder.Services.AddHostedService<MonstreMaintenanceService>();
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddControllers().AddJsonOptions(options => {
