@@ -44,6 +44,7 @@ namespace APIMonstre.Controllers
                     {
                         return BadRequest();
                     }
+
                     personnage.PositionX -= 1 ;
                     break;
 

@@ -38,8 +38,8 @@ namespace APIMonstre.Models.Dto
 
     public class TuileAvecInfosDto
     {
-        public int X { get; set; }
-        public int Y { get; set; }
+        public int PositionX { get; set; }
+        public int PositionY { get; set; }
         public TypeTuile TypeTuile { get; set; }
         public string ImageURL { get; set; }
 
@@ -76,8 +76,8 @@ namespace APIMonstre.Models.Dto
 
             return new TuileAvecInfosDto
             {
-                X = tuile.PositionX,
-                Y = tuile.PositionY,
+                PositionX = tuile.PositionX,
+                PositionY = tuile.PositionY,
                 ImageURL = tuile.ImageURL,
                 TypeTuile = (TypeTuile)tuile.Type,
                 EstAccessible = tuile.EstTraversable,
