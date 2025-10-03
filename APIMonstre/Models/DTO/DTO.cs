@@ -41,6 +41,7 @@ namespace APIMonstre.Models.Dto
         public int X { get; set; }
         public int Y { get; set; }
         public TypeTuile TypeTuile { get; set; }
+        public string ImageURL { get; set; }
 
         // Monstre présent sur la tuile (null si aucun)
         public InstanceMonstreDto Monstre { get; set; }
@@ -77,6 +78,7 @@ namespace APIMonstre.Models.Dto
             {
                 X = tuile.PositionX,
                 Y = tuile.PositionY,
+                ImageURL = tuile.ImageURL,
                 TypeTuile = (TypeTuile)tuile.Type,
                 EstAccessible = tuile.EstTraversable,
                 Monstre = monstre != null ? ConvertirInstanceMonstreVersDto(monstre, context) : null
