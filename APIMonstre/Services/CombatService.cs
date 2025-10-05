@@ -50,7 +50,8 @@ namespace APIMonstre.Services
                         Niveau = personnage.Niveau,
                         PointsVieMax = personnage.PointsVieMax,
                         Force = personnage.Force,
-                        Defense = personnage.Defense
+                        Defense = personnage.Defense,
+                        SeuilsExperienceProchainNiveau = seuilsExperience[personnage.Niveau - 1]
                     });
                 }
                 
@@ -61,7 +62,7 @@ namespace APIMonstre.Services
 
             personnage.PointsVie -= degatsPersonnage;
             instance.PointsVieActuels -= degatsMonstre;
-            // Tbd si ca marche
+            
             context.Entry(instance).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 
             return new PersonnageInfosCombatDto(personnage, false, false, null);
