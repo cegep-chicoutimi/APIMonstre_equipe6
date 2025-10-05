@@ -36,7 +36,7 @@ namespace APIMonstre.Controllers
             switch (direction)
             {
                 case "up":
-                    if(personnage.PositionY - 1 < 0)
+                    if(personnage.PositionX - 1 < 0)
                     {
                         return BadRequest();
                     }
