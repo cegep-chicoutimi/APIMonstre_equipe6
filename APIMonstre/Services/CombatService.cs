@@ -57,10 +57,12 @@ namespace APIMonstre.Services
                 return new PersonnageInfosCombatDto(personnage, true, false, null);
             }
 
+            InstanceMonstre instance = context.InstanceMonstre.FirstOrDefault(im => im.PositionX == tuile.Monstre.X && im.PositionY == tuile.Monstre.Y);
+
             personnage.PointsVie -= degatsPersonnage;
-            tuile.Monstre.PointsVieActuels -= degatsMonstre;
+            instance.PointsVieActuels -= degatsMonstre;
             // Tbd si ca marche
-            context.Entry(tuile.Monstre).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            context.Entry(instance).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 
             return new PersonnageInfosCombatDto(personnage, false, false, null);
         }

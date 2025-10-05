@@ -83,7 +83,7 @@ namespace APIMonstre.Controllers
                     return BadRequest();
 
             }
-            PersonnageInfosCombatDto dto; 
+            PersonnageInfosCombatDto dto = null;
 
             if (tuile.TypeTuile == TypeTuile.VILLE)
             {
