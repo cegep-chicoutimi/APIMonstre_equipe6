@@ -84,5 +84,35 @@ namespace APIMonstre.Models.Dto
                 Monstre = monstre != null ? ConvertirInstanceMonstreVersDto(monstre, context) : null
             };
         }
+
+    }
+    public class PersonnageInfosCombatDto
+    {
+        public int Experience { get; set; }
+        public int PointsVie { get; set; }
+        public int PositionX { get; set; }
+        public int PositionY { get; set; }
+        public bool Victoire { get; set; } 
+        public bool Defaite { get; set; }
+        public PersonnageLevelUpDto? LevelUp { get; set; } = null;
+
+        public PersonnageInfosCombatDto(Personnage personnage, bool victoire, bool defaite, PersonnageLevelUpDto? levelUp)
+        {
+            Experience = personnage.Experience;
+            PointsVie = personnage.PointsVie;
+            PositionX = personnage.PositionX;
+            PositionY = personnage.PositionY;
+            Victoire = victoire;
+            Defaite = defaite;
+            LevelUp = levelUp;
+        }
+    }
+    public class PersonnageLevelUpDto
+    {
+        public int Niveau { get; set; }
+        public int PointsVieMax { get; set; }
+        public int Force { get; set; }
+        public int Defense { get; set; }
+        public int SeuilsExperienceProchainNiveau { get; set; }
     }
 }

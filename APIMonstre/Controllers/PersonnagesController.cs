@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using APIMonstre.Data.Context;
 using APIMonstre.Models;
 using APIMonstre.Models.Dto;
+using APIMonstre.Services;
 
 namespace APIMonstre.Controllers
 {
@@ -24,7 +25,7 @@ namespace APIMonstre.Controllers
 
         [HttpGet]
         [Route("{idPersonnage}/{direction}")]
-        public async Task<ActionResult<int[]>> DeplacerPersonnage(int idPersonnage, string direction)
+        public async Task<ActionResult<PersonnageInfosCombatDto>> DeplacerPersonnage(int idPersonnage, string direction)
         {
             var personnage = await _context.Personnage.FindAsync(idPersonnage);
             if(personnage == null)
@@ -35,7 +36,7 @@ namespace APIMonstre.Controllers
             switch (direction)
             {
                 case "up":
-                    if(personnage.PositionX - 1 < 0)
+                    if(personnage.PositionY - 1 < 0)
                     {
                         return BadRequest();
                     }
@@ -44,10 +45,7 @@ namespace APIMonstre.Controllers
                     {
                         return BadRequest();
                     }
-
-                    personnage.PositionX -= 1 ;
                     break;
-
                 case "down":
                     if(personnage.PositionX + 1 > 49)
                     {
@@ -58,9 +56,7 @@ namespace APIMonstre.Controllers
                     {
                         return BadRequest();
                     }
-                    personnage.PositionX += 1 ;
                     break;
-
                 case "left":
                     if(personnage.PositionY - 1 < 0)
                     {
@@ -71,9 +67,7 @@ namespace APIMonstre.Controllers
                     {
                         return BadRequest();
                     }
-                    personnage.PositionY -= 1 ;
                     break;
-
                 case "right":
                     if(personnage.PositionY + 1 > 49)
                     {
@@ -84,13 +78,31 @@ namespace APIMonstre.Controllers
                     {
                         return BadRequest();
                     }
-                    personnage.PositionY += 1 ;
-                    
                     break;
                 default:
                     return BadRequest();
 
             }
+            PersonnageInfosCombatDto dto; 
+
+            if (tuile.TypeTuile == TypeTuile.VILLE)
+            {
+                personnage.DernierVillageX = tuile.PositionX;
+                personnage.DernierVillageY = tuile.PositionY;
+                personnage.PointsVie = personnage.PointsVieMax;
+            }
+            if (tuile.Monstre != null)
+            {
+                dto = CombatService.Combattre(personnage, tuile, _context);
+            }
+            else
+            {
+                personnage.PositionX = tuile.PositionX;
+                personnage.PositionY = tuile.PositionY;
+                dto = new(personnage, false, false, null);
+            }
+
+
             _context.Entry(personnage).State = EntityState.Modified;
 
             try
@@ -108,8 +120,8 @@ namespace APIMonstre.Controllers
                     throw;
                 }
             }
-            
-            return new int[] { personnage.PositionX, personnage.PositionY};
+
+            return dto;
         }
 
         // GET: api/Personnages

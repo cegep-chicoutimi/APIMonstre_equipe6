@@ -2,7 +2,6 @@ using APIMonstre.Models;
 using Microsoft.EntityFrameworkCore;
 using APIMonstre.Data.Context;
 using APIMonstre.Migrations;
-using APIMonstre.Models;
 
 namespace APIMonstre.Services
 {

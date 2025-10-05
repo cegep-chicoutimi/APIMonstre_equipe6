@@ -14,6 +14,8 @@ namespace APIMonstre.Models
         public int Defense { get; set; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
+        public int DernierVillageX { get; set; }
+        public int DernierVillageY { get; set; }
         public DateTime DateCreation { get; set; }
         [ForeignKey("Utilisateur")]
         public int IdUtilisateur { get; set; }
@@ -31,6 +33,8 @@ namespace APIMonstre.Models
             PositionY = new Random().Next(2, 48);
             DateCreation = DateTime.Now;
             IdUtilisateur = idUtilisateur;
+            DernierVillageX = PositionX;
+            DernierVillageY = PositionY;
         }
     }
 }
