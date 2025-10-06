@@ -65,7 +65,7 @@ namespace APIMonstre.Models.Dto
                 PointsVieMax = instanceMonstre.PointsVieMax,
                 Attaque = instanceMonstre.CalculerAttaque(),
                 Defense = instanceMonstre.CalculerDefense(),
-                ExperienceDonnee = instanceMonstre.Monstre.ExperienceBase * instanceMonstre.Niveau,
+                ExperienceDonnee = (instanceMonstre.Monstre.ExperienceBase * instanceMonstre.Niveau * 10),
                 EstVivant = instanceMonstre.PointsVieActuels > 0
             };
         }
