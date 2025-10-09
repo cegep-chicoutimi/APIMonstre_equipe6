@@ -65,7 +65,7 @@ namespace APIMonstre.Models.Dto
                 PointsVieMax = instanceMonstre.PointsVieMax,
                 Attaque = instanceMonstre.CalculerAttaque(),
                 Defense = instanceMonstre.CalculerDefense(),
-                ExperienceDonnee = (instanceMonstre.Monstre.ExperienceBase * instanceMonstre.Niveau * 10),
+                ExperienceDonnee = (instanceMonstre.Monstre.ExperienceBase + instanceMonstre.Niveau) * 10,
                 EstVivant = instanceMonstre.PointsVieActuels > 0
             };
         }
@@ -114,5 +114,52 @@ namespace APIMonstre.Models.Dto
         public int Force { get; set; }
         public int Defense { get; set; }
         public int SeuilsExperienceProchainNiveau { get; set; }
+    }
+
+    public class LoginResponseDto
+    {
+        public int IdUtilisateur { get; set; }
+        public string Email { get; set; }
+        public string Pseudo { get; set; }
+        public PersonnageDto Personnage { get; set; }
+
+        public LoginResponseDto(int idUtilisateur, string email, string pseudo, PersonnageDto personnage)
+        {
+            IdUtilisateur = idUtilisateur;
+            Email = email;
+            Pseudo = pseudo;
+            Personnage = personnage;
+        }
+    }
+    public class PersonnageDto
+    {
+        public int IdPersonnage { get; set; }
+        public string Nom { get; set; } = string.Empty;
+        public int Niveau { get; set; }
+        public int Experience { get; set; }
+        public int PointsVie { get; set; }
+        public int PointsVieMax { get; set; }
+        public int Force { get; set; }
+        public int Defense { get; set; }
+        public int PositionX { get; set; }
+        public int PositionY { get; set; }
+        public int DernierVillageX { get; set; }
+        public int DernierVillageY { get; set; }
+
+        public PersonnageDto(Personnage personnage)
+        {
+            IdPersonnage = personnage.IdPersonnage;
+            Nom = personnage.Nom;
+            Niveau = personnage.Niveau;
+            Experience = personnage.Experience;
+            PointsVie = personnage.PointsVie;
+            PointsVieMax = personnage.PointsVieMax;
+            Force = personnage.Force;
+            Defense = personnage.Defense;
+            PositionX = personnage.PositionX;
+            PositionY = personnage.PositionY;
+            DernierVillageX = personnage.DernierVillageX;
+            DernierVillageY = personnage.DernierVillageY;
+        }
     }
 }

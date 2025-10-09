@@ -38,16 +38,16 @@ namespace APIMonstre.Controllers
             switch (direction)
             {
                 case "up":
-                    newY--;
-                    break;
-                case "down":
-                    newY++;
-                    break;
-                case "left":
                     newX--;
                     break;
-                case "right":
+                case "down":
                     newX++;
+                    break;
+                case "left":
+                    newY--;
+                    break;
+                case "right":
+                    newY++;
                     break;
                 default:
                     return BadRequest();

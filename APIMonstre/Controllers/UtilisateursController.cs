@@ -24,7 +24,7 @@ namespace APIMonstre.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<ActionResult<Utilisateur>> Register([FromBody] RegisterRequestDto request)
+        public async Task<ActionResult<LoginResponseDto>> Register([FromBody] RegisterRequestDto request)
         {
             var existingUtilisateur = await _context.Utilisateur.FirstOrDefaultAsync(u => u.Email == request.Email);
 
@@ -38,13 +38,16 @@ namespace APIMonstre.Controllers
             utilisateur = await _context.Utilisateur.FirstOrDefaultAsync(_ => _.Email == request.Email);
             _context.Add(new Personnage(utilisateur.IdUtilisateur));
             await _context.SaveChangesAsync();
+            var personnage = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == utilisateur.IdUtilisateur);
 
-            return CreatedAtAction("GetUtilisateur", new { id = utilisateur.IdUtilisateur }, utilisateur);
+            PersonnageDto personnageDto = new(personnage);
+
+            return new LoginResponseDto(utilisateur.IdUtilisateur, utilisateur.Email, utilisateur.Pseudo, personnageDto);
         }
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult<Utilisateur>> Login([FromBody] LoginRequestDto request)
+        public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto request)
         {
             var existingUtilisateur = await _context.Utilisateur.FirstOrDefaultAsync(u => u.Email == request.Email && u.MotDePasse == request.Password);
 
@@ -70,8 +73,10 @@ namespace APIMonstre.Controllers
                     throw;
                 }
             }
+            var personnage = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == existingUtilisateur.IdUtilisateur);
+            PersonnageDto personnageDto = new(personnage);
 
-            return existingUtilisateur;
+            return new LoginResponseDto(existingUtilisateur.IdUtilisateur, existingUtilisateur.Email, existingUtilisateur.Pseudo, personnageDto);
         }
 
         [HttpPost]
@@ -107,18 +112,18 @@ namespace APIMonstre.Controllers
         }
 
         // GET: api/Utilisateurs/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Utilisateur>> GetUtilisateur(int id)
-        {
-            var utilisateur = await _context.Utilisateur.FindAsync(id);
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<Utilisateur>> GetUtilisateur(int id)
+        //{
+        //    var utilisateur = await _context.Utilisateur.FindAsync(id);
 
-            if (utilisateur == null)
-            {
-                return NotFound();
-            }
+        //    if (utilisateur == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return utilisateur;
-        }
+        //    return utilisateur;
+        //}
 
         //// PUT: api/Utilisateurs/5
         //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
