@@ -9,6 +9,9 @@ namespace APIMonstre.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<MonstreMaintenanceService> _logger;
+        private const int MONSTER_COUNT_TARGET = 300;
+        private const int CHECK_INTERVAL = 30;
+
 
         public MonstreMaintenanceService(IServiceProvider serviceProvider, ILogger<MonstreMaintenanceService> logger)
         {
@@ -25,7 +28,7 @@ namespace APIMonstre.Services
                 //On peut utiliser le context de la même façon que dans nos controllers à partir d'ici
                 var monsterCount = await context.InstanceMonstre.CountAsync(cancellationToken);
 
-                if (monsterCount <= 300)
+                if (monsterCount <= MONSTER_COUNT_TARGET)
                 {
                     //On va creer un nouveau instanceMonstre et l<ajouter a la base de donnes
                     await GenererMonstre(context, monsterCount);
@@ -48,7 +51,7 @@ namespace APIMonstre.Services
             }
 
             //Boucle de génération d'instanceMonstre
-            for (int i = MonsterCount; i < 300; i++)
+            for (int i = MonsterCount; i < MONSTER_COUNT_TARGET; i++)
             {
                 //Get position du monstre
                 Tuile spawnTuile = tuilesPossibles.OrderBy(t => Random.Shared.Next()).First();
@@ -81,7 +84,7 @@ namespace APIMonstre.Services
         //Conçu pour s'exécuter une seule fois et contenir une boucle.
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            TimeSpan _checkInterval = TimeSpan.FromMinutes(30); // Check every 30 minutes
+            TimeSpan _checkInterval = TimeSpan.FromMinutes(CHECK_INTERVAL); // Check every 30 minutes
                                                                 // Perform initial check on startup
             await ValidateMonsterCount(cancellationToken);
 

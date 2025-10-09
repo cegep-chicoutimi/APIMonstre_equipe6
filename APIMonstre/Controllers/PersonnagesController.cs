@@ -17,6 +17,7 @@ namespace APIMonstre.Controllers
     public class PersonnagesController : ControllerBase
     {
         private readonly MonstreContext _context;
+        private const int GRID_MIN = 0, GRID_MAX = 49;
 
         public PersonnagesController(MonstreContext context)
         {
@@ -33,56 +34,39 @@ namespace APIMonstre.Controllers
                 return NotFound();
             }
             TuileAvecInfosDto tuile;
+            int newX = 0, newY = 0;
             switch (direction)
             {
                 case "up":
-                    if(personnage.PositionX - 1 < 0)
-                    {
-                        return BadRequest();
-                    }
-                    tuile = new TuilesController(_context).GetTuile(personnage.PositionX - 1, personnage.PositionY).Result.Value;
-                    if (!tuile.EstAccessible)
-                    {
-                        return BadRequest();
-                    }
+                    newY--;
                     break;
                 case "down":
-                    if(personnage.PositionX + 1 > 49)
-                    {
-                        return BadRequest();
-                    }
-                    tuile = new TuilesController(_context).GetTuile(personnage.PositionX + 1, personnage.PositionY).Result.Value;
-                    if (!tuile.EstAccessible)
-                    {
-                        return BadRequest();
-                    }
+                    newY++;
                     break;
                 case "left":
-                    if(personnage.PositionY - 1 < 0)
-                    {
-                        return BadRequest();
-                    }
-                    tuile = new TuilesController(_context).GetTuile(personnage.PositionX, personnage.PositionY - 1).Result.Value;
-                    if (!tuile.EstAccessible)
-                    {
-                        return BadRequest();
-                    }
+                    newX--;
                     break;
                 case "right":
-                    if(personnage.PositionY + 1 > 49)
-                    {
-                        return BadRequest();
-                    }
-                    tuile = new TuilesController(_context).GetTuile(personnage.PositionX, personnage.PositionY + 1).Result.Value;
-                    if (!tuile.EstAccessible)
-                    {
-                        return BadRequest();
-                    }
+                    newX++;
                     break;
                 default:
                     return BadRequest();
 
             }
+            
+            if (personnage.PositionX + newX < GRID_MIN || personnage.PositionX + newX > GRID_MAX
+                || personnage.PositionY + newY < GRID_MIN || personnage.PositionY + newY > GRID_MAX)
+            {
+                return BadRequest();
+            }
+
+            tuile = new TuilesController(_context).GetTuile(personnage.PositionX + newX, personnage.PositionY + newY).Result.Value;
+
+            if (!tuile.EstAccessible)
+            {
+                return BadRequest();
+            }
+
             PersonnageInfosCombatDto dto = null;
 
             if (tuile.TypeTuile == TypeTuile.VILLE)
@@ -101,7 +85,6 @@ namespace APIMonstre.Controllers
                 personnage.PositionY = tuile.PositionY;
                 dto = new(personnage, false, false, null);
             }
-
 
             _context.Entry(personnage).State = EntityState.Modified;
 
