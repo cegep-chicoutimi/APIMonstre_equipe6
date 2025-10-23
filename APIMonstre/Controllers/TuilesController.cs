@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using APIMonstre.Models.Dto;
+using APIMonstre.Services;
 
 namespace APIMonstre.Controllers
 {
@@ -19,11 +20,11 @@ namespace APIMonstre.Controllers
         }
 
         // GET: api/Tuiles
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tuile>>> GetTuile()
-        {
-            return await _context.Tuile.ToListAsync();
-        }
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Tuile>>> GetTuiles()
+        //{
+        //    return await _context.Tuile.ToListAsync();
+        //}
 
         [HttpPost]
         [Route("explorer")]
@@ -123,59 +124,59 @@ namespace APIMonstre.Controllers
 
         // PUT: api/Tuiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTuile(int id, Tuile tuile)
-        {
-            if (id != tuile.PositionX)
-            {
-                return BadRequest();
-            }
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutTuile(int id, Tuile tuile)
+        //{
+        //    if (id != tuile.PositionX)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            _context.Entry(tuile).State = EntityState.Modified;
+        //    _context.Entry(tuile).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TuileExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!TuileExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         // POST: api/Tuiles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Tuile>> PostTuile(Tuile tuile)
-        {
-            _context.Tuile.Add(tuile);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (TuileExists(tuile.PositionX))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //[HttpPost]
+        //public async Task<ActionResult<Tuile>> PostTuile(Tuile tuile)
+        //{
+        //    _context.Tuile.Add(tuile);
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        if (TuileExists(tuile.PositionX))
+        //        {
+        //            return Conflict();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return CreatedAtAction("GetTuile", new { id = tuile.PositionX }, tuile);
-        }
+        //    return CreatedAtAction("GetTuile", new { id = tuile.PositionX }, tuile);
+        //}
 
         // DELETE: api/Tuiles/5
         /**[HttpDelete("{id}")]

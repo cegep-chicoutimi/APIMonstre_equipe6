@@ -8,7 +8,7 @@ namespace APIMonstre.Services
     {
         private static int[] seuilsExperience = new int[]
         {
-            550, 650, 800, 950, 1050, 1200, 1350, 1450, 1600, 1750,
+            0, 550, 650, 800, 950, 1050, 1200, 1350, 1450, 1600, 1750,
             1850, 2000, 2150, 2250, 2400, 2550, 2650, 2800, 2950, 3100,
             3200, 3350, 3500, 3600, 3750, 3900, 4000, 4150, 4300, 4400,
             4550, 4700, 4800, 4950, 5100, 5200, 5350, 5500, 5600, 5750,
@@ -43,19 +43,20 @@ namespace APIMonstre.Services
                 personnage.PositionY = tuile.PositionY;
                 personnage.PointsVie -= degatsPersonnage;
 
+                bool victoire, defaite;
                 if (GagnerUnNiveau(personnage))
                 {
-                    return new PersonnageInfosCombatDto(personnage, true, false, new PersonnageLevelUpDto
+                    return new PersonnageInfosCombatDto(personnage, victoire = true, defaite = false, new PersonnageLevelUpDto
                     {
                         Niveau = personnage.Niveau,
                         PointsVieMax = personnage.PointsVieMax,
                         Force = personnage.Force,
                         Defense = personnage.Defense,
-                        SeuilsExperienceProchainNiveau = seuilsExperience[personnage.Niveau - 1]
+                        SeuilsExperienceProchainNiveau = seuilsExperience[personnage.Niveau]
                     });
                 }
                 
-                return new PersonnageInfosCombatDto(personnage, true, false, null);
+                return new PersonnageInfosCombatDto(personnage, victoire = true, defaite = false, null);
             }
 
             InstanceMonstre instance = context.InstanceMonstre.FirstOrDefault(im => im.PositionX == tuile.Monstre.X && im.PositionY == tuile.Monstre.Y);
@@ -69,7 +70,7 @@ namespace APIMonstre.Services
         }
         private static bool GagnerUnNiveau(Personnage personnage)
         {
-            if(personnage.Experience >= seuilsExperience[personnage.Niveau - 1])
+            if(personnage.Experience >= seuilsExperience[personnage.Niveau])
             {
                 personnage.Niveau ++;
                 personnage.Force++;

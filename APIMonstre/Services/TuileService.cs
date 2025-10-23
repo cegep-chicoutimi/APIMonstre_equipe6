@@ -1,6 +1,6 @@
 ﻿using APIMonstre.Models;
 
-namespace APIMonstre.Controllers
+namespace APIMonstre.Services
 {
     public static class TuileService
     {

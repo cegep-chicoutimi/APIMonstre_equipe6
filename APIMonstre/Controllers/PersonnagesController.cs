@@ -33,20 +33,23 @@ namespace APIMonstre.Controllers
             {
                 return NotFound();
             }
-            TuileAvecInfosDto tuile;
             int newX = 0, newY = 0;
-            switch (direction)
+            switch (direction.ToLower().Trim())
             {
                 case "up":
+                case "haut":
                     newX--;
                     break;
                 case "down":
+                case "bas":
                     newX++;
                     break;
                 case "left":
+                case "gauche":
                     newY--;
                     break;
                 case "right":
+                case "droite":
                     newY++;
                     break;
                 default:
@@ -60,8 +63,8 @@ namespace APIMonstre.Controllers
                 return BadRequest();
             }
 
-            tuile = new TuilesController(_context).GetTuile(personnage.PositionX + newX, personnage.PositionY + newY).Result.Value;
-
+            TuileAvecInfosDto tuile = TuileAvecInfosDto.ConvertirTuileVersDto(_context.Tuile.Where(t => t.PositionX == personnage.PositionX + newX && t.PositionY == personnage.PositionY + newY).FirstOrDefault(), _context);
+            
             if (!tuile.EstAccessible)
             {
                 return BadRequest();
@@ -83,7 +86,7 @@ namespace APIMonstre.Controllers
             {
                 personnage.PositionX = tuile.PositionX;
                 personnage.PositionY = tuile.PositionY;
-                dto = new(personnage, false, false, null);
+                dto = new PersonnageInfosCombatDto(personnage, false, false, null);
             }
 
             _context.Entry(personnage).State = EntityState.Modified;
@@ -108,12 +111,12 @@ namespace APIMonstre.Controllers
         }
 
         // GET: api/Personnages
-        [HttpGet]
-        [Route("{idUtilisateur}")]
-        public async Task<ActionResult<IEnumerable<Personnage>>> GetPersonnages(int idUtilisateur)
-        {
-            return await _context.Personnage.Where(p => p.IdUtilisateur == idUtilisateur).ToListAsync();
-        }
+        //[HttpGet]
+        //[Route("{idUtilisateur}")]
+        //public async Task<ActionResult<IEnumerable<Personnage>>> GetPersonnages(int idUtilisateur)
+        //{
+        //    return await _context.Personnage.Where(p => p.IdUtilisateur == idUtilisateur).ToListAsync();
+        //}
 
         // GET: api/Personnages/5
         //[HttpGet("{id}")]
