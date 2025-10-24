@@ -38,19 +38,19 @@ namespace APIMonstre.Controllers
             {
                 case "up":
                 case "haut":
-                    newX--;
+                    newY--;
                     break;
                 case "down":
                 case "bas":
-                    newX++;
+                    newY++;
                     break;
                 case "left":
                 case "gauche":
-                    newY--;
+                    newX--;
                     break;
                 case "right":
                 case "droite":
-                    newY++;
+                    newX++;
                     break;
                 default:
                     return BadRequest();
