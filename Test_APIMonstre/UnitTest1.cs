@@ -83,37 +83,46 @@ namespace Test_APIMonstre
             int startY = response.Personnage.PositionY;
             int startHP = response.Personnage.PointsVie;
             int idPersonnage = response.Personnage.IdPersonnage;
-
+            int personnageExp = response.Personnage.Experience;
             // ================================================================
             // STEP 4: EXPLORE TILE TO THE RIGHT
             // ================================================================
             // Les coordonnées refletent le comportement côté Web
 
-            int targetX = startX;
-            int targetY = startY + 1;
+            int targetX = startX + 1;
+            int targetY = startY;
             string direction = "right";
 
+            int[][] coords = new int[3][];
+            coords[0] = new int[2];
+            coords[1] = new int[2];
+            coords[2] = new int[2];
+            coords[0][0] = targetX;
+            coords[0][1] = targetY - 1;
+            coords[1][0] = targetX;
+            coords[1][1] = targetY;
+            coords[2][0] = targetX;
+            coords[2][1] = targetY + 1;
+
             var exploreResponse = await _client.PostAsJsonAsync(
-                $"/api/Personnages/{idPersonnage}/{direction}",
-                testEmail
+                $"/api/Tuiles/explorer", coords
             );
 
             Assert.True(exploreResponse.IsSuccessStatusCode,
                 $"Explore failed: {await exploreResponse.Content.ReadAsStringAsync()}");
 
-            var tileInfo = await exploreResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto>();
+            var tileInfo = await exploreResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto[]>();
             Assert.NotNull(tileInfo);
 
-            bool hasMonster = tileInfo.Monstre != null;
+            bool hasMonster = tileInfo[1].Monstre != null;
 
 
             // ================================================================
             // STEP 5: MOVE TO THE RIGHT
             // ================================================================
 
-            var moveResponse = await _client.PostAsJsonAsync(
-                $"/api/Personnages/Deplacement/{targetX}/{targetY}",
-                testEmail
+            var moveResponse = await _client.GetAsync(
+                $"/api/Personnages/{idPersonnage}/{direction}"
             );
 
             Assert.True(moveResponse.IsSuccessStatusCode,
@@ -127,60 +136,70 @@ namespace Test_APIMonstre
             // ================================================================
 
             Assert.True(moveResult.Experience != null, "Character info should be returned with every movement");
-            Assert.True(moveResult.LevelUp != null, "Character info should be returned with every movement");
-            Assert.True(moveResult. != null, "Character info should be returned with every movement");
-            Assert.True(moveResult.Experience != null, "Character info should be returned with every movement");
-            Assert.True(moveResult.Experience != null, "Character info should be returned with every movement");
+            Assert.True(moveResult.PointsVie != null, "Character info should be returned with every movement");
+            Assert.True(moveResult.PositionX != null, "Character info should be returned with every movement");
+            Assert.True(moveResult.PositionY != null, "Character info should be returned with every movement");
 
+            bool levelUp = moveResult.LevelUp != null;
+
+            if (levelUp)
+            {
+                Assert.True(moveResult.LevelUp.Niveau != null, "Character info should be returned with level up");
+                Assert.True(moveResult.LevelUp.Defense != null, "Character info should be returned with level up");
+                Assert.True(moveResult.LevelUp.Force != null, "Character info should be returned with level up");
+                Assert.True(moveResult.LevelUp.PointsVieMax != null, "Character info should be returned with level up");
+                Assert.True(moveResult.LevelUp.SeuilsExperienceProchainNiveau != null, "Character info should be returned with level up");
+            }
 
             if (hasMonster)
             {
                 // There was a monster - check combat results
-                if (moveResult.monstreVaincu)
+                if (moveResult.Victoire)
                 {
                     // Verify we gained XP
-                    Assert.True(moveResult.xpGained > 0, "Should have gained XP from defeating monster");
+                    Assert.True(moveResult.Experience > 0, "Should have gained XP from defeating monster");
 
                     // Verify we moved to the tile (only if we won)
-                    Assert.Equal(targetX, moveResult.finalX);
-                    Assert.Equal(targetY, moveResult.finalY);
+                    Assert.Equal(targetX, moveResult.PositionX);
+                    Assert.Equal(targetY, moveResult.PositionY);
 
                 }
-                else if (moveResult.personnageDead)
+                else if (moveResult.Defaite)
                 {
                     // Verify we didn't gain XP
-                    Assert.Equal(0, moveResult.xpGained);
+                    Assert.Equal(0, moveResult.Experience);
 
                     // Verify HP is full
-                    Assert.Equal(moveResult.personnage.PointsVieMax, moveResult.personnage.PointsVieActuels);
+                    Assert.Equal(moveResult.PointsVieMax, moveResult.PointsVie);
 
                     // Verify we're not at the target (we teleported home)
-                    Assert.True(moveResult.finalX != targetX || moveResult.finalY != targetY,
+                    Assert.True(moveResult.PositionX != targetX || moveResult.PositionY != targetY,
                         "Should have been teleported away from combat location");
                 }
                 else
                 {
-                    Assert.Equal(startX, moveResult.finalX);
-                    Assert.Equal(startY, moveResult.finalY);
-                    Assert.Equal(0, moveResult.xpGained);
-                    Assert.True(moveResult.levelUp == null, "Should not level up if monster not defeated");
-                    Assert.False(moveResult.personnageDead, "Character should not be dead if monster not defeated");
-                    Assert.False(moveResult.monstreVaincu, "Monster should not be defeated if character not dead");
+                    Assert.Equal(startX, moveResult.PositionX);
+                    Assert.Equal(startY, moveResult.PositionY);
+                    Assert.Equal(personnageExp, moveResult.Experience);
+                    Assert.True(moveResult.LevelUp == null, "Should not level up if monster not defeated");
+                    Assert.False(moveResult.Defaite, "Character should not be dead if monster not defeated");
+                    Assert.False(moveResult.Victoire, "Monster should not be defeated if character not dead");
                 }
             }
             else
             {
                 // Verify we moved
-                Assert.Equal(targetX, moveResult.finalX);
-                Assert.Equal(targetY, moveResult.finalY);
+                Assert.Equal(targetX, moveResult.PositionX);
+                Assert.Equal(targetY, moveResult.PositionY);
 
                 // Verify no combat occurred
-                Assert.False(moveResult.monstreVaincu);
-                Assert.False(moveResult.personnageDead);
-                Assert.Equal(0, moveResult.xpGained);
+                Assert.False(moveResult.Defaite);
+                Assert.False(moveResult.Victoire);
+                Assert.Equal(personnageExp, moveResult.Experience);
 
                 // Verify HP didn't change
-                Assert.Equal(startHP, moveResult.personnage.PointsVieActuels);
+                Assert.Equal(startHP, moveResult.PointsVie);
             }
         }
+    }
 }

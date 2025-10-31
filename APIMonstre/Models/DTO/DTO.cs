@@ -90,16 +90,20 @@ namespace APIMonstre.Models.Dto
     {
         public int Experience { get; set; }
         public int PointsVie { get; set; }
+        public int PointsVieMax { get; set; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public bool Victoire { get; set; } 
         public bool Defaite { get; set; }
         public PersonnageLevelUpDto? LevelUp { get; set; } = null;
 
+        public PersonnageInfosCombatDto() { }
+
         public PersonnageInfosCombatDto(Personnage personnage, bool victoire, bool defaite, PersonnageLevelUpDto? levelUp)
         {
             Experience = personnage.Experience;
             PointsVie = personnage.PointsVie;
+            PointsVieMax = personnage.PointsVieMax;
             PositionX = personnage.PositionX;
             PositionY = personnage.PositionY;
             Victoire = victoire;
@@ -114,6 +118,8 @@ namespace APIMonstre.Models.Dto
         public int Force { get; set; }
         public int Defense { get; set; }
         public int SeuilsExperienceProchainNiveau { get; set; }
+
+        public PersonnageLevelUpDto() { }
     }
 
     public class LoginResponseDto
@@ -123,6 +129,7 @@ namespace APIMonstre.Models.Dto
         public string Pseudo { get; set; }
         public PersonnageDto Personnage { get; set; }
 
+        public LoginResponseDto() { }
         public LoginResponseDto(int idUtilisateur, string email, string pseudo, PersonnageDto personnage)
         {
             IdUtilisateur = idUtilisateur;
@@ -146,6 +153,7 @@ namespace APIMonstre.Models.Dto
         public int DernierVillageX { get; set; }
         public int DernierVillageY { get; set; }
 
+        public PersonnageDto() { }
         public PersonnageDto(Personnage personnage)
         {
             IdPersonnage = personnage.IdPersonnage;
