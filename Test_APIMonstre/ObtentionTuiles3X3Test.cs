@@ -208,10 +208,10 @@ namespace Test_APIMonstre
             var responseContent = await exploreResponse.Content.ReadAsStringAsync();
 
             // Vérifie que le statut HTTP est 404 Not Found
-            Assert.Equal(System.Net.HttpStatusCode.NotFound, exploreResponse.StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.Unauthorized, exploreResponse.StatusCode);
 
             // Vérifie que le message de retour contient bien ton message
-            Assert.Contains("Utilisateur non trouvé", responseContent);
+            Assert.Contains("Utilisateur non connecté", responseContent);
         }
 
         private int[][] GetCoordsAround(int posX, int posY)

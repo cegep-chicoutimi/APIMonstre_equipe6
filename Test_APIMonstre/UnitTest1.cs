@@ -2,6 +2,7 @@ using APIMonstre.Models;
 using APIMonstre.Models.Dto;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Net.Http.Json;
 
 namespace Test_APIMonstre
@@ -104,8 +105,14 @@ namespace Test_APIMonstre
             coords[2][0] = targetX;
             coords[2][1] = targetY + 1;
 
+            var exploreDto = new ExplorerDto
+            {
+                Coords = coords,
+                Email = testEmail
+            };
+
             var exploreResponse = await _client.PostAsJsonAsync(
-                $"/api/Tuiles/explorer", coords
+                $"/api/Tuiles/explorer", exploreDto
             );
 
             Assert.True(exploreResponse.IsSuccessStatusCode,
