@@ -170,4 +170,16 @@ namespace APIMonstre.Models.Dto
             DernierVillageY = personnage.DernierVillageY;
         }
     }
+
+    public class ExplorerDto
+    {
+        public int[][] Coords { get; set; }
+        public string Email { get; set; }
+        public ExplorerDto() { }
+        public ExplorerDto(int[][] coords, string email)
+        {
+            Coords = coords;
+            Email = email;
+        }
+    }
 }

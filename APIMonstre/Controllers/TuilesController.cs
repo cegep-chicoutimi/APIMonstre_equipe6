@@ -28,22 +28,26 @@ namespace APIMonstre.Controllers
 
         [HttpPost]
         [Route("explorer")]
-        public async Task<ActionResult<TuileAvecInfosDto[]>> GetTuiles([FromBody] int[][] coords)
+        public async Task<ActionResult<TuileAvecInfosDto[]>> GetTuiles([FromBody] ExplorerDto explorerDto)
         {
             var tuiles = new List<Tuile>();
             var tuilesDto = new List<TuileAvecInfosDto>();
-            if(coords.Length > 9)
+
+            if (explorerDto.Coords.Length > 9)
             {
                 return Forbid();
             }
-            if (!AllCoordsAdjacent(coords))
+            if (!AllCoordsAdjacent(explorerDto.Coords))
             {
                 return BadRequest();
             }
-
-            for(int i = 0; i < coords.Length; i++)
+            if (VerificationUtilisateur(explorerDto.Email) is ActionResult failResult && failResult is not OkResult)
             {
-                tuiles.AddRange(await _context.Tuile.Where(t => t.PositionX == coords[i][0] && t.PositionY == coords[i][1]).ToListAsync());
+                return failResult;
+            }
+            for (int i = 0; i < explorerDto.Coords.Length; i++)
+            {
+                tuiles.AddRange(await _context.Tuile.Where(t => t.PositionX == explorerDto.Coords[i][0] && t.PositionY == explorerDto.Coords[i][1]).ToListAsync());
             }
             foreach(Tuile tuile in tuiles)
             {
@@ -86,15 +90,17 @@ namespace APIMonstre.Controllers
 
         // GET: api/Tuiles/5
         [HttpGet("{x}/{y}")]
-        public async Task<ActionResult<TuileAvecInfosDto>> GetTuile(int x, int y)
+        public async Task<ActionResult<TuileAvecInfosDto>> GetTuile([FromBody] string email, int x, int y)
         {
             if (x < 0 || x >= 50 || y < 0 || y >= 50)
             {
                 return BadRequest("Les coordonnées doivent être comprises entre 0 et 49 (monde 50x50).");
             }
-
+            if (VerificationUtilisateur(email) is ActionResult failResult && failResult is not OkResult)
+            {
+                return failResult;
+            }
             var tuile = await _context.Tuile.Where(t => t.PositionX == x && t.PositionY == y).FirstOrDefaultAsync();
-
             if (tuile == null)
             {
                 var tuilesList = await GetTuileAdjacentes(x, y);
@@ -102,6 +108,10 @@ namespace APIMonstre.Controllers
 
                 _context.Tuile.Add(tuile);
                 await _context.SaveChangesAsync();
+            }
+            if(!(Math.Abs(tuile.PositionX - x) <= 2) || !(Math.Abs(tuile.PositionY - y) <= 2))
+            {
+                return Forbid("La tuile demandée n'est pas à portée du personnage.");
             }
 
             return TuileAvecInfosDto.ConvertirTuileVersDto(tuile, _context);
@@ -120,6 +130,20 @@ namespace APIMonstre.Controllers
             return list ?? new List<Tuile>();
         }
 
+        private ActionResult VerificationUtilisateur(string email)
+        {
+            Utilisateur? user = _context.Utilisateur.FirstOrDefault(u => u.Email == email);
+            if (user == null)
+            {
+                return NotFound("Utilisateur non trouvé.");
+            }
+            Personnage? perso = _context.Personnage.FirstOrDefault(p => p.IdUtilisateur == user.IdUtilisateur);
+            if (perso == null)
+            {
+                return NotFound("Personnage non trouvé pour cet utilisateur.");
+            }
+            return Ok();
+        }
 
 
         // PUT: api/Tuiles/5
