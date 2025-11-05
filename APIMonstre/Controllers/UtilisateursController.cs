@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using APIMonstre.Data.Context;
+using APIMonstre.Models;
+using APIMonstre.Models.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using APIMonstre.Data.Context;
-using APIMonstre.Models;
-using APIMonstre.Models.Dto;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mail;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace APIMonstre.Controllers
 {
@@ -42,18 +44,23 @@ namespace APIMonstre.Controllers
 
             PersonnageDto personnageDto = new(personnage);
 
-            return new LoginResponseDto(utilisateur.IdUtilisateur, utilisateur.Email, utilisateur.Pseudo, personnageDto);
+            return new LoginResponseDto(utilisateur.IdUtilisateur, utilisateur.Email, utilisateur.Pseudo, personnageDto, utilisateur.estConnecte);
         }
 
         [HttpPost]
         [Route("login")]
         public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto request)
         {
+            if(string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            {
+                return BadRequest("Email et mot de passe sont requis.");
+            }
+
             var existingUtilisateur = await _context.Utilisateur.FirstOrDefaultAsync(u => u.Email == request.Email && u.MotDePasse == request.Password);
 
             if (existingUtilisateur == null)
             {
-                return NotFound();
+                return Unauthorized();
             }
             existingUtilisateur.estConnecte = true;
             _context.Entry(existingUtilisateur).State = EntityState.Modified;
@@ -76,7 +83,7 @@ namespace APIMonstre.Controllers
             var personnage = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == existingUtilisateur.IdUtilisateur);
             PersonnageDto personnageDto = new(personnage);
 
-            return new LoginResponseDto(existingUtilisateur.IdUtilisateur, existingUtilisateur.Email, existingUtilisateur.Pseudo, personnageDto);
+            return new LoginResponseDto(existingUtilisateur.IdUtilisateur, existingUtilisateur.Email, existingUtilisateur.Pseudo, personnageDto, existingUtilisateur.estConnecte);
         }
 
         [HttpPost]
