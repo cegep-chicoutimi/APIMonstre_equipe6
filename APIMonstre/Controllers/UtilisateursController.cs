@@ -32,7 +32,7 @@ namespace APIMonstre.Controllers
             {
                 return BadRequest();
             }
-            Utilisateur utilisateur = new Utilisateur() { Email = request.Email, Pseudo = request.Pseudo, MotDePasse = request.Password, DateInscription = DateTime.Now };
+            Utilisateur utilisateur = new Utilisateur() { Email = request.Email, Pseudo = request.Pseudo, MotDePasse = request.Password, DateInscription = DateTime.Now, estConnecte = true};
             _context.Add(utilisateur);
             await _context.SaveChangesAsync();
             utilisateur = await _context.Utilisateur.FirstOrDefaultAsync(_ => _.Email == request.Email);

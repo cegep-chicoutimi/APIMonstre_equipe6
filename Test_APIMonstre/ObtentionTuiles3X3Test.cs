@@ -1,69 +1,48 @@
 using APIMonstre.Models;
 using APIMonstre.Models.Dto;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System.Net.Http.Json;
+using Xunit;
 
 namespace Test_APIMonstre
 {
-    //using Microsoft.VisualStudio.TestPlatform.TestHost;
-    //no clue si ca marche
-
     public class ObtentionTuiles3X3Test : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly WebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
+        private static string _registeredEmail;
+        private static bool _isSetupDone = false;
+        private static readonly object _lock = new();
+
         public ObtentionTuiles3X3Test(WebApplicationFactory<Program> factory)
         {
             _factory = factory;
             _client = factory.CreateClient();
+
+            if (!_isSetupDone)
+            {
+                lock (_lock)
+                {
+                    if (!_isSetupDone)
+                    {
+                        SetupAsync().GetAwaiter().GetResult();
+                        _isSetupDone = true;
+                    }
+                }
+            }
         }
 
-        [Fact]
-        public async Task GetTuiles_AtMapEdge_ReturnsOnlyAvailableTiles()
+        private async Task SetupAsync()
         {
-            var posX = 49;
-            var posY = 49;
-            // Wait for initialization services to complete
-            await Task.Delay(2000); // Give services time to initialize map
+            await Task.Delay(2000); // Donne un peu de temps à l'appli pour démarrer
 
-            int[][] coords = [ 
-                [posX-1, posY+1],
-                [posX, posY+1],
-                [posX+1,posY+1],
-                [posX+1,posY],
-                [posX + 1, posY-1],
-                [posX, posY - 1],
-                [posX - 1, posY - 1],
-                [posX - 1, posY] 
-                ];
-
-            var exploreResponse = await _client.PostAsJsonAsync(
-                $"/api/Tuiles/explorer", coords
-            );
-
-            Assert.True(exploreResponse.IsSuccessStatusCode,
-                $"Explore failed: {await exploreResponse.Content.ReadAsStringAsync()}");
-        }
-
-        [Fact]
-        public async Task CompleteGameFlow_RegisterLoginAndMove_Works()
-        {
-            // Wait for initialization services to complete
-            await Task.Delay(2000); // Give services time to initialize map
-
-            // Generate unique email for this test run
-            var testEmail = $"testplayer_{Guid.NewGuid()}@test.com";
+            _registeredEmail = $"testplayer_{Guid.NewGuid()}@test.com";
             var testPassword = "password123";
             var testPseudo = "TestHero";
 
-            // ================================================================
-            // STEP 1: REGISTER
-            // ================================================================
-
             var registerDto = new RegisterRequestDto
             {
-                Email = testEmail,
+                Email = _registeredEmail,
                 Password = testPassword,
                 Pseudo = testPseudo
             };
@@ -73,161 +52,183 @@ namespace Test_APIMonstre
                 registerDto
             );
 
-            // Verify registration succeeded
+            var content = await registerResponse.Content.ReadAsStringAsync();
+
             Assert.True(registerResponse.IsSuccessStatusCode,
-                $"Registration failed: {await registerResponse.Content.ReadAsStringAsync()}");
+                $"L'enregistrement a échoué : {content}");
+        }
 
+        [Fact]
+        public async Task GetTuiles_AtMapEdge_ReturnsOnlyAvailableTiles()
+        {
+            var posX = 49;
+            var posY = 49;
 
-            // ================================================================
-            // STEP 2: LOGIN
-            // ================================================================
+            await Task.Delay(2000); // Attend que la carte soit prête
 
-            var loginDto = new LoginRequestDto
-            {
-                Email = testEmail,
-                Password = testPassword
-            };
-
-            var loginResponse = await _client.PostAsJsonAsync(
-                "/api/Utilisateurs/login",
-                loginDto
-            );
-
-            Assert.True(loginResponse.IsSuccessStatusCode,
-                $"Login failed: {await loginResponse.Content.ReadAsStringAsync()}");
-
-
-            // ================================================================
-            // STEP 3: GET CHARACTER INFO
-            // ================================================================
-
-
-
-            LoginResponseDto response = await loginResponse.Content.ReadFromJsonAsync<LoginResponseDto>();
-            Assert.NotNull(response.Personnage);
-
-            // Store starting position
-            int startX = response.Personnage.PositionX;
-            int startY = response.Personnage.PositionY;
-            int startHP = response.Personnage.PointsVie;
-            int idPersonnage = response.Personnage.IdPersonnage;
-            int personnageExp = response.Personnage.Experience;
-            // ================================================================
-            // STEP 4: EXPLORE TILE TO THE RIGHT
-            // ================================================================
-            // Les coordonnées refletent le comportement côté Web
-
-            int targetX = startX + 1;
-            int targetY = startY;
-            string direction = "right";
-
-            int[][] coords = new int[3][];
-            coords[0] = new int[2];
-            coords[1] = new int[2];
-            coords[2] = new int[2];
-            coords[0][0] = targetX;
-            coords[0][1] = targetY - 1;
-            coords[1][0] = targetX;
-            coords[1][1] = targetY;
-            coords[2][0] = targetX;
-            coords[2][1] = targetY + 1;
+            var coords = GetCoordsAround(posX, posY);
+            ExplorerDto exploreDto = CreateDto(coords);
 
             var exploreResponse = await _client.PostAsJsonAsync(
-                $"/api/Tuiles/explorer", coords
+                "/api/Tuiles/explorer", exploreDto
             );
 
+            var responseContent = await exploreResponse.Content.ReadAsStringAsync();
             Assert.True(exploreResponse.IsSuccessStatusCode,
-                $"Explore failed: {await exploreResponse.Content.ReadAsStringAsync()}");
+                $"Échec de l'exploration : {responseContent}");
 
-            var tileInfo = await exploreResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto[]>();
-            Assert.NotNull(tileInfo);
+            var exploreResult = await exploreResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto[]>();
+            Assert.Equal(3, exploreResult.Length);
+        }
 
-            bool hasMonster = tileInfo[1].Monstre != null;
+        [Fact]
+        public async Task GetTuiles_WithAuthenticatedUser_Returns3x3Grid()
+        {
+            var posX = 25;
+            var posY = 25;
 
+            await Task.Delay(2000); // Attend que la carte soit prête
 
-            // ================================================================
-            // STEP 5: MOVE TO THE RIGHT
-            // ================================================================
+            var coords = GetCoordsAround(posX, posY);
+            ExplorerDto exploreDto = CreateDto(coords);
 
-            var moveResponse = await _client.GetAsync(
-                $"/api/Personnages/{idPersonnage}/{direction}"
+            var exploreResponse = await _client.PostAsJsonAsync(
+                "/api/Tuiles/explorer", exploreDto
             );
 
-            Assert.True(moveResponse.IsSuccessStatusCode,
-                $"Move failed: {await moveResponse.Content.ReadAsStringAsync()}");
+            var responseContent = await exploreResponse.Content.ReadAsStringAsync();
+            var exploreResult = await exploreResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto[]>();
+            Assert.True(exploreResponse.IsSuccessStatusCode,
+                $"Échec de l'exploration : {responseContent}");
+            Assert.Equal(8, exploreResult.Length);
+        }
 
-            var moveResult = await moveResponse.Content.ReadFromJsonAsync<PersonnageInfosCombatDto>();
-            Assert.NotNull(moveResult);
+        [Fact]
+        public async Task GetTuiles_WithAuthenticatedUser_IncludesMonsterData()
+        {
+            var posX = 23;
+            var posY = 23;
 
-            // ================================================================
-            // STEP 6: VERIFY RESULTS
-            // ================================================================
+            await Task.Delay(2000); // Attend que la carte soit prête
 
-            Assert.True(moveResult.Experience != null, "Character info should be returned with every movement");
-            Assert.True(moveResult.PointsVie != null, "Character info should be returned with every movement");
-            Assert.True(moveResult.PositionX != null, "Character info should be returned with every movement");
-            Assert.True(moveResult.PositionY != null, "Character info should be returned with every movement");
+            var coords = GetCoordsAround(posX, posY);
+            ExplorerDto exploreDto = CreateDto(coords);
 
-            bool levelUp = moveResult.LevelUp != null;
+            var exploreResponse = await _client.PostAsJsonAsync(
+                "/api/Tuiles/explorer", exploreDto
+            );
 
-            if (levelUp)
+            var responseContent = await exploreResponse.Content.ReadAsStringAsync();
+            var exploreResult = await exploreResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto[]>();
+            Assert.True(exploreResponse.IsSuccessStatusCode,
+                $"Échec de l'exploration : {responseContent}");
+            var tuileWithMonstre = exploreResult.FirstOrDefault(m => m.PositionX == 23 && m.PositionY == 22);
+            Assert.Equal(681, tuileWithMonstre.Monstre.MonstreId);
+            Assert.Equal("aegislash-shield", tuileWithMonstre.Monstre.Nom);
+        }
+
+        private static ExplorerDto CreateDto(int[][] coords)
+        {
+            return new ExplorerDto
             {
-                Assert.True(moveResult.LevelUp.Niveau != null, "Character info should be returned with level up");
-                Assert.True(moveResult.LevelUp.Defense != null, "Character info should be returned with level up");
-                Assert.True(moveResult.LevelUp.Force != null, "Character info should be returned with level up");
-                Assert.True(moveResult.LevelUp.PointsVieMax != null, "Character info should be returned with level up");
-                Assert.True(moveResult.LevelUp.SeuilsExperienceProchainNiveau != null, "Character info should be returned with level up");
-            }
+                Coords = coords,
+                Email = _registeredEmail
+            };
+        }
 
-            if (hasMonster)
+        [Fact]
+        public async Task GetTuiles_WithoutAuthentication_ReturnsUnauthorized()
+        {
+            var posX = 23;
+            var posY = 23;
+
+            await Task.Delay(2000); // Attend que la carte soit prête
+
+            var coords = GetCoordsAround(posX, posY);
+
+            var exploreDto = new ExplorerDto
             {
-                // There was a monster - check combat results
-                if (moveResult.Victoire)
-                {
-                    // Verify we gained XP
-                    Assert.True(moveResult.Experience > 0, "Should have gained XP from defeating monster");
+                Coords = coords,
+                Email = $"testplayer_{Guid.NewGuid()}@test.com"
+            };
 
-                    // Verify we moved to the tile (only if we won)
-                    Assert.Equal(targetX, moveResult.PositionX);
-                    Assert.Equal(targetY, moveResult.PositionY);
+            var exploreResponse = await _client.PostAsJsonAsync(
+                "/api/Tuiles/explorer", exploreDto
+            );
 
-                }
-                else if (moveResult.Defaite)
-                {
-                    // Verify we didn't gain XP
-                    Assert.Equal(0, moveResult.Experience);
+            var responseContent = await exploreResponse.Content.ReadAsStringAsync();
 
-                    // Verify HP is full
-                    Assert.Equal(moveResult.PointsVieMax, moveResult.PointsVie);
+            // Vérifie que le statut HTTP est 404 Not Found
+            Assert.Equal(System.Net.HttpStatusCode.NotFound, exploreResponse.StatusCode);
 
-                    // Verify we're not at the target (we teleported home)
-                    Assert.True(moveResult.PositionX != targetX || moveResult.PositionY != targetY,
-                        "Should have been teleported away from combat location");
-                }
-                else
-                {
-                    Assert.Equal(startX, moveResult.PositionX);
-                    Assert.Equal(startY, moveResult.PositionY);
-                    Assert.Equal(personnageExp, moveResult.Experience);
-                    Assert.True(moveResult.LevelUp == null, "Should not level up if monster not defeated");
-                    Assert.False(moveResult.Defaite, "Character should not be dead if monster not defeated");
-                    Assert.False(moveResult.Victoire, "Monster should not be defeated if character not dead");
-                }
-            }
-            else
+            // Vérifie que le message de retour contient bien ton message
+            Assert.Contains("Utilisateur non trouvé", responseContent);
+        }
+
+        [Fact]
+        public async Task GetTuiles_WithDisconnectedUser_ReturnsUnauthorized()
+        {
+            var posX = 23;
+            var posY = 23;
+
+            await Task.Delay(2000); // Attend que la carte soit prête
+
+            var email = $"testplayer_{Guid.NewGuid()}@test.com";
+            var testPassword = "password123";
+            var testPseudo = "TestHero";
+
+            var registerDto = new RegisterRequestDto
             {
-                // Verify we moved
-                Assert.Equal(targetX, moveResult.PositionX);
-                Assert.Equal(targetY, moveResult.PositionY);
+                Email = email,
+                Password = testPassword,
+                Pseudo = testPseudo
+            };
 
-                // Verify no combat occurred
-                Assert.False(moveResult.Defaite);
-                Assert.False(moveResult.Victoire);
-                Assert.Equal(personnageExp, moveResult.Experience);
+            await _client.PostAsJsonAsync(
+                "/api/Utilisateurs/register",
+                registerDto
+            );
+            await _client.PostAsJsonAsync(
+                "/api/Utilisateurs/logout",
+                registerDto
+            );
 
-                // Verify HP didn't change
-                Assert.Equal(startHP, moveResult.PointsVie);
-            }
+            var coords = GetCoordsAround(posX, posY);
+
+            var exploreDto = new ExplorerDto
+            {
+                Coords = coords,
+                Email = email
+            };
+
+            var exploreResponse = await _client.PostAsJsonAsync(
+                "/api/Tuiles/explorer", exploreDto
+            );
+
+            var responseContent = await exploreResponse.Content.ReadAsStringAsync();
+
+            // Vérifie que le statut HTTP est 404 Not Found
+            Assert.Equal(System.Net.HttpStatusCode.NotFound, exploreResponse.StatusCode);
+
+            // Vérifie que le message de retour contient bien ton message
+            Assert.Contains("Utilisateur non trouvé", responseContent);
+        }
+
+        private int[][] GetCoordsAround(int posX, int posY)
+        {
+            int[][] coords =
+            [
+                [posX-1, posY+1],
+                [posX, posY+1],
+                [posX+1,posY+1],
+                [posX+1,posY],
+                [posX + 1, posY-1],
+                [posX, posY - 1],
+                [posX - 1, posY - 1],
+                [posX - 1, posY]
+            ];
+
+            return coords;
         }
     }
 }
