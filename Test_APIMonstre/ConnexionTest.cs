@@ -14,53 +14,13 @@ namespace Test_APIMonstre
     {
         private readonly WebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
-        private string _registeredEmail;
-        private string _password;
-        private bool _isSetupDone = false;
-        private readonly object _lock = new();
+        private string _registeredEmail = "test_Connexion@test.com";
+        private string _password = "password123";
 
         public ConnexionTest(WebApplicationFactory<Program> factory)
         {
             _factory = factory;
             _client = factory.CreateClient();
-
-            if (!_isSetupDone)
-            {
-                lock (_lock)
-                {
-                    if (!_isSetupDone)
-                    {
-                        SetupAsync().GetAwaiter().GetResult();
-                        _isSetupDone = true;
-                    }
-                }
-            }
-        }
-
-        private async Task SetupAsync()
-        {
-            await Task.Delay(2000); // Donne un peu de temps à l'appli pour démarrer
-
-            _registeredEmail = $"testplayer_{Guid.NewGuid()}@test.com";
-            _password = "password123";
-            var testPseudo = "TestHero";
-
-            var registerDto = new RegisterRequestDto
-            {
-                Email = _registeredEmail,
-                Password = _password,
-                Pseudo = testPseudo
-            };
-
-            var registerResponse = await _client.PostAsJsonAsync(
-                "/api/Utilisateurs/register",
-                registerDto
-            );
-
-            var content = await registerResponse.Content.ReadAsStringAsync();
-
-            Assert.True(registerResponse.IsSuccessStatusCode,
-                $"L'enregistrement a échoué : {content}");
         }
 
         [Fact]

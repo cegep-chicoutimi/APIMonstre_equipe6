@@ -10,52 +10,15 @@ namespace Test_APIMonstre
     {
         private readonly WebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
-        private static string _registeredEmail;
-        private static bool _isSetupDone = false;
-        private static readonly object _lock = new();
+        private string _registeredEmail = "test_Obtention3X3@test.com";
+        private string _logOutUser = "logoutUser@test.com";
+        private string _password = "password123";
+        
 
         public ObtentionTuiles3X3Test(WebApplicationFactory<Program> factory)
         {
             _factory = factory;
             _client = factory.CreateClient();
-
-            if (!_isSetupDone)
-            {
-                lock (_lock)
-                {
-                    if (!_isSetupDone)
-                    {
-                        SetupAsync().GetAwaiter().GetResult();
-                        _isSetupDone = true;
-                    }
-                }
-            }
-        }
-
-        private async Task SetupAsync()
-        {
-            await Task.Delay(2000); // Donne un peu de temps à l'appli pour démarrer
-
-            _registeredEmail = $"testplayer_{Guid.NewGuid()}@test.com";
-            var testPassword = "password123";
-            var testPseudo = "TestHero";
-
-            var registerDto = new RegisterRequestDto
-            {
-                Email = _registeredEmail,
-                Password = testPassword,
-                Pseudo = testPseudo
-            };
-
-            var registerResponse = await _client.PostAsJsonAsync(
-                "/api/Utilisateurs/register",
-                registerDto
-            );
-
-            var content = await registerResponse.Content.ReadAsStringAsync();
-
-            Assert.True(registerResponse.IsSuccessStatusCode,
-                $"L'enregistrement a échoué : {content}");
         }
 
         [Fact]
@@ -127,7 +90,7 @@ namespace Test_APIMonstre
             Assert.Equal("aegislash-shield", tuileWithMonstre.Monstre.Nom);
         }
 
-        private static ExplorerDto CreateDto(int[][] coords)
+        private ExplorerDto CreateDto(int[][] coords)
         {
             return new ExplorerDto
             {
@@ -173,15 +136,11 @@ namespace Test_APIMonstre
 
             await Task.Delay(2000); // Attend que la carte soit prête
 
-            var email = $"testplayer_{Guid.NewGuid()}@test.com";
-            var testPassword = "password123";
-            var testPseudo = "TestHero";
-
             var registerDto = new RegisterRequestDto
             {
-                Email = email,
-                Password = testPassword,
-                Pseudo = testPseudo
+                Email = _logOutUser,
+                Password = _password,
+                Pseudo = "TestLoggedOut"
             };
 
             await _client.PostAsJsonAsync(
@@ -198,7 +157,7 @@ namespace Test_APIMonstre
             var exploreDto = new ExplorerDto
             {
                 Coords = coords,
-                Email = email
+                Email = _logOutUser
             };
 
             var exploreResponse = await _client.PostAsJsonAsync(
