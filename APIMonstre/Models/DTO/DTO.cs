@@ -127,15 +127,17 @@ namespace APIMonstre.Models.Dto
         public int IdUtilisateur { get; set; }
         public string Email { get; set; }
         public string Pseudo { get; set; }
+        public bool EstConnecte { get; set; }
         public PersonnageDto Personnage { get; set; }
 
         public LoginResponseDto() { }
-        public LoginResponseDto(int idUtilisateur, string email, string pseudo, PersonnageDto personnage)
+        public LoginResponseDto(int idUtilisateur, string email, string pseudo, PersonnageDto personnage, bool estConnecte)
         {
             IdUtilisateur = idUtilisateur;
             Email = email;
             Pseudo = pseudo;
             Personnage = personnage;
+            EstConnecte = estConnecte;
         }
     }
     public class PersonnageDto

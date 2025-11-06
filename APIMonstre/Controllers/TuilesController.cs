@@ -152,6 +152,9 @@ namespace APIMonstre.Controllers
             {
                 return NotFound("Personnage non trouvé pour cet utilisateur.");
             }
+            if (!user.estConnecte) {
+                return Unauthorized("Utilisateur non connecté");
+            }
             return Ok(perso);
         }
         // PUT: api/Tuiles/5
