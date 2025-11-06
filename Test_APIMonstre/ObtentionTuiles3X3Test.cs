@@ -81,10 +81,10 @@ namespace Test_APIMonstre
                 "/api/Tuiles/explorer", exploreDto
             );
 
-            var responseContent = await exploreResponse.Content.ReadAsStringAsync();
+            //var responseContent = await exploreResponse.Content.ReadAsStringAsync();
             var exploreResult = await exploreResponse.Content.ReadFromJsonAsync<TuileAvecInfosDto[]>();
             Assert.True(exploreResponse.IsSuccessStatusCode,
-                $"Échec de l'exploration : {responseContent}");
+                $"Échec de l'exploration ");
             var tuileWithMonstre = exploreResult.FirstOrDefault(m => m.PositionX == 23 && m.PositionY == 22);
             Assert.Equal(681, tuileWithMonstre.Monstre.MonstreId);
             Assert.Equal("aegislash-shield", tuileWithMonstre.Monstre.Nom);
