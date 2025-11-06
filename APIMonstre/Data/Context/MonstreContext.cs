@@ -10,6 +10,9 @@ namespace APIMonstre.Data.Context
         public DbSet<Utilisateur> Utilisateur { get; set; }
         public DbSet<Personnage> Personnage { get; set; }
         public DbSet<InstanceMonstre> InstanceMonstre {  get; set; }
+        public DbSet<ChasseQuetes> ChasseQuetes {  get; set; }
+        public DbSet<LevelUpQuetes> LevelUpQuetes {  get; set; }
+        public DbSet<RandonneQuetes> RandonneQuetes {  get; set; }
 
         public MonstreContext(DbContextOptions<MonstreContext> options) : base(options)
         {
