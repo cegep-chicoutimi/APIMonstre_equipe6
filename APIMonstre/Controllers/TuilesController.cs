@@ -1,11 +1,12 @@
 ﻿using APIMonstre.Data.Context;
 using APIMonstre.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using APIMonstre.Models.Dto;
 using APIMonstre.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using System.Collections.Generic;
 
 namespace APIMonstre.Controllers
 {
@@ -42,9 +43,10 @@ namespace APIMonstre.Controllers
             {
                 return BadRequest();
             }
-            if (VerificationUtilisateur(explorerDto.Email) is ActionResult failResult && failResult is not OkResult)
+            ActionResult reponse = VerificationUtilisateur(explorerDto.Email);
+            if (reponse is not OkObjectResult okReponse)
             {
-                return failResult;
+                return reponse;
             }
             for (int i = 0; i < explorerDto.Coords.Length; i++)
             {
@@ -142,10 +144,6 @@ namespace APIMonstre.Controllers
             if (user == null)
             {
                 return NotFound("Utilisateur non trouvé.");
-            }
-            if (!user.estConnecte)
-            {
-                return StatusCode(403, "Utilisateur non connecté.");
             }
             Personnage? perso = _context.Personnage.FirstOrDefault(p => p.IdUtilisateur == user.IdUtilisateur);
             if (perso == null)
