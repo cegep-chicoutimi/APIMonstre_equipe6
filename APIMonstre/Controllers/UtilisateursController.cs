@@ -28,6 +28,10 @@ namespace APIMonstre.Controllers
         [Route("register")]
         public async Task<ActionResult<LoginResponseDto>> Register([FromBody] RegisterRequestDto request)
         {
+            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.Pseudo))
+            {
+                return BadRequest("Email, mot de passe et pseudo sont requis.");
+            }
             var existingUtilisateur = await _context.Utilisateur.FirstOrDefaultAsync(u => u.Email == request.Email);
 
             if (existingUtilisateur != null)
@@ -38,11 +42,31 @@ namespace APIMonstre.Controllers
             _context.Add(utilisateur);
             await _context.SaveChangesAsync();
             utilisateur = await _context.Utilisateur.FirstOrDefaultAsync(_ => _.Email == request.Email);
-            _context.Add(new Personnage(utilisateur.IdUtilisateur));
-            await _context.SaveChangesAsync();
-            var personnage = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == utilisateur.IdUtilisateur);
 
-            PersonnageDto personnageDto = new(personnage);
+            Personnage personnage = new Personnage(utilisateur.IdUtilisateur);
+            _context.Add(personnage);
+
+            var tuilesVille = await _context.Tuile
+                .Where(t => (TypeTuile)t.Type == TypeTuile.VILLE)
+                .ToListAsync();
+
+            if (tuilesVille.Count > 0)
+            {
+                // Sélection aléatoire d'une tuile VILLE
+                var rnd = new Random();
+                var tuileAleatoire = tuilesVille[rnd.Next(tuilesVille.Count)];
+
+                // Assignation de la tuile au personnage (en supposant que Personnage a une propriété IdTuileSpawn ou similaire)
+                personnage.PositionX = tuileAleatoire.PositionX;
+                personnage.PositionY = tuileAleatoire.PositionY;
+
+                await _context.SaveChangesAsync();
+            }
+
+            await _context.SaveChangesAsync();
+            var personnageUtilisateur = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == utilisateur.IdUtilisateur);
+
+            PersonnageDto personnageDto = new(personnageUtilisateur);
 
             return new LoginResponseDto(utilisateur.IdUtilisateur, utilisateur.Email, utilisateur.Pseudo, personnageDto, utilisateur.estConnecte);
         }
