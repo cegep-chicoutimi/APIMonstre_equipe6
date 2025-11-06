@@ -50,6 +50,12 @@ namespace APIMonstre.Data.Context
                 .HasOne(im => im.Monstre)
                 .WithMany()
                 .HasForeignKey("MonstreId"); // Assuming you'll add a MonstreId property
+
+            modelBuilder.Entity<RandonneQuetes>()
+                .HasOne(rq => rq.Tuile)
+                .WithMany()
+                .HasForeignKey(rq => new {rq.TuileX, rq.TuileY })
+                .HasPrincipalKey(t => new { t.PositionX, t.PositionY });
         }
     }
 }
