@@ -18,10 +18,12 @@ namespace APIMonstre.Controllers
     {
         private readonly MonstreContext _context;
         private const int GRID_MIN = 0, GRID_MAX = 49;
+        private readonly QuetesService quetesService;
 
         public PersonnagesController(MonstreContext context)
         {
             _context = context;
+            quetesService = new QuetesService(context);
         }
 
         [HttpGet]
@@ -80,7 +82,7 @@ namespace APIMonstre.Controllers
             }
             if (tuile.Monstre != null)
             {
-                dto = CombatService.Combattre(personnage, tuile, _context);
+                dto = CombatService.Combattre(personnage, tuile, _context); 
             }
             else
             {
@@ -94,6 +96,31 @@ namespace APIMonstre.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                if (dto.Victoire)
+                {
+                    var ChasseQuete = await _context.ChasseQuetes.FirstOrDefaultAsync(cq => cq.PersonnageId == personnage.IdPersonnage);
+                    var levelUpQuete = await _context.LevelUpQuetes.FirstOrDefaultAsync(lq => lq.PersonnageId == personnage.IdPersonnage);
+                    if (ChasseQuete != null)
+                    {
+                        if (ChasseQuete.Type.Equals(tuile.Monstre.Type1) || ChasseQuete.Type.Equals(tuile.Monstre.Type2))
+                        {
+                            // update le nombre de monstre tue et passe EstComplete a true si quete finie
+
+                        }
+                    }
+                    if (levelUpQuete != null && dto.LevelUp != null)
+                    {
+                        // update le status de la quete si le niveau du personnage est >= au niveau objectif
+                        dto.LevelUpQuetes = quetesService.UpdateLevelUpQuete(levelUpQuete, dto.LevelUp.Niveau).Result;
+                    }
+                }
+                var randonneQuete = await _context.RandonneQuetes.FirstOrDefaultAsync(rq => rq.PersonnageId == personnage.IdPersonnage);
+                if (randonneQuete != null)
+                {
+                    dto.RandonneQuetes = quetesService.UpdateRandonneQueteAsync(randonneQuete, dto.PositionX, dto.PositionY).Result;
+                }
+                return dto;
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -107,7 +134,13 @@ namespace APIMonstre.Controllers
                 }
             }
 
-            return dto;
+            
+        }
+
+        private void UpdateQuetes(PersonnageInfosCombatDto dto)
+        {
+            
+            throw new NotImplementedException();
         }
 
         // GET: api/Personnages

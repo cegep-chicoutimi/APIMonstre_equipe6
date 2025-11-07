@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APIMonstre.Services
 {
-    public class QuestService : BackgroundService
+    public class QuetesMaintenanceService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<MonstreMaintenanceService> _logger;
@@ -13,7 +13,7 @@ namespace APIMonstre.Services
         private const int MAX_MONSTER_TO_KILL = 15;
         private const int MAX_LEVEL_TO_REACH = 4;
 
-        public QuestService(IServiceProvider serviceProvider, ILogger<MonstreMaintenanceService> logger)
+        public QuetesMaintenanceService(IServiceProvider serviceProvider, ILogger<MonstreMaintenanceService> logger)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -101,8 +101,13 @@ namespace APIMonstre.Services
 
         private async Task<RandonneQuetes> GenerateRandonneQuetes(MonstreContext context, Personnage personnage)
         {
-            Tuile randomTuile = await context.Tuile.ElementAtAsync(Random.Shared.Next(context.Tuile.Count()));
-
+            Tuile randomTuile;
+            do
+            {
+                randomTuile = await context.Tuile.ElementAtAsync(Random.Shared.Next(context.Tuile.Count()));
+            } while (randomTuile.Type.Equals(TypeTuile.EAU) ||
+            randomTuile.Type.Equals(TypeTuile.MONTAGNE));
+            
             return new RandonneQuetes { 
                 PersonnageId = personnage.IdPersonnage,
                 TuileX = randomTuile.PositionX,

@@ -14,5 +14,13 @@ namespace APIMonstre.Models
         public int PersonnageId { get; set; }
         public Personnage Personnage { get; set; }
 
+        public void UpdateStatus() 
+        {
+            if (NbTue == ObjectifTue) 
+            {
+                EstComplete = true;    
+            }
+
+        }
     }
 }

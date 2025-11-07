@@ -12,5 +12,13 @@ namespace APIMonstre.Models
         [ForeignKey("Personnage")]
         public int PersonnageId { get; set; }
         public Personnage Personnage { get; set; }
+
+        internal void UpdateStatus(int niveau)
+        {
+            if (NiveauObjectif >= niveau)
+            {
+                EstComplete = true;
+            }
+        }
     }
 }
