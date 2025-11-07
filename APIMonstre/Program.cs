@@ -25,6 +25,7 @@ public class Program
         });
 
         builder.Services.AddHostedService<MonstreMaintenanceService>();
+        builder.Services.AddHostedService<QuestService>();
 
         // Add services to the container.
         builder.Services.AddControllers();

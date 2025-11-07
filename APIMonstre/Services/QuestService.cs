@@ -8,7 +8,7 @@ namespace APIMonstre.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<MonstreMaintenanceService> _logger;
-        private const int CHECK_INTERVAL = 10;
+        private const int CHECK_INTERVAL = 1;
         private const int MIN_MONSTER_TO_KILL = 8;
         private const int MAX_MONSTER_TO_KILL = 15;
         private const int MAX_LEVEL_TO_REACH = 4;
@@ -64,6 +64,9 @@ namespace APIMonstre.Services
                 var context = scope.ServiceProvider.GetRequiredService<MonstreContext>();
 
                 var personnageList = context.Personnage.ToArray();
+                var chasseQuestList = new List<ChasseQuetes>();
+                var levelUpQuestList = new List<LevelUpQuetes>();
+                var randoQuestList = new List<RandonneQuetes>();
 
                 foreach (var personnage in personnageList) 
                 {
@@ -74,21 +77,25 @@ namespace APIMonstre.Services
                     if (chasseQuest == null) 
                     {
                         var newQuest = await GenerateChasseQuetes(context, personnage.IdPersonnage);
-                        await context.ChasseQuetes.AddAsync(newQuest);
+                        chasseQuestList.Add(newQuest);
                     }
                     if (levelUpQuest == null)
                     {
                         var newQuest = await GenerateLevelUpQuetes(personnage);
-                        await context.LevelUpQuetes.AddAsync(newQuest);
+                        levelUpQuestList.Add(newQuest);
                     }
                     if (randoQuest == null)
                     {
                         var newQuest = await GenerateRandonneQuetes(context, personnage);
-                        await context.RandonneQuetes.AddAsync(newQuest);
+                        randoQuestList.Add(newQuest);
+                       
                     }
-
-                    await context.SaveChangesAsync();
                 }
+
+                await context.ChasseQuetes.AddRangeAsync(chasseQuestList);
+                await context.LevelUpQuetes.AddRangeAsync(levelUpQuestList);
+                await context.RandonneQuetes.AddRangeAsync(randoQuestList);
+                await context.SaveChangesAsync();
             }
         }
 
@@ -119,8 +126,14 @@ namespace APIMonstre.Services
         private async Task<ChasseQuetes> GenerateChasseQuetes(MonstreContext context, int idPersonnage)
         {
             Monster randomMonster = await context.Monster.ElementAtAsync(Random.Shared.Next(context.Monster.Count()));
-
-            var typeToHunt = Random.Shared.Next(2) == 1 ? randomMonster.Type1 : randomMonster.Type2;
+            string typeToHunt;
+            if (randomMonster.Type2 == null) {
+                typeToHunt = randomMonster.Type1;
+            }else
+            {
+                typeToHunt = Random.Shared.Next(2) == 1 ? randomMonster.Type1 : randomMonster.Type2;
+            }
+             
             var nbToKill = Random.Shared.Next(MIN_MONSTER_TO_KILL, MAX_MONSTER_TO_KILL);
 
             return new ChasseQuetes{

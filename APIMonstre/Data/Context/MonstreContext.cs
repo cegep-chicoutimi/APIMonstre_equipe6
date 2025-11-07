@@ -27,6 +27,12 @@ namespace APIMonstre.Data.Context
 
             modelBuilder.Entity<Personnage>().HasKey(p => p.IdPersonnage).HasName("PrimaryKey_PersonnageId");
 
+            modelBuilder.Entity<ChasseQuetes>().HasKey(q => q.IdChasseQuetes).HasName("PrimaryKey_ChasseQuetes");
+
+            modelBuilder.Entity<RandonneQuetes>().HasKey(q => q.IdRandonneQuetes).HasName("PrimaryKey_RandonneQuetes");
+
+            modelBuilder.Entity<LevelUpQuetes>().HasKey(q => q.IdLevelUpQuetes).HasName("PrimaryKey_LevelUpQuetes");
+
             modelBuilder.Entity<Tuile>()
                 .HasKey(pk => new { pk.PositionX, pk.PositionY });
 
