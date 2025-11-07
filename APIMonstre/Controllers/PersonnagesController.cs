@@ -99,26 +99,26 @@ namespace APIMonstre.Controllers
 
                 if (dto.Victoire)
                 {
-                    var ChasseQuete = await _context.ChasseQuetes.FirstOrDefaultAsync(cq => cq.PersonnageId == personnage.IdPersonnage);
+                    var chasseQuete = await _context.ChasseQuetes.FirstOrDefaultAsync(cq => cq.PersonnageId == personnage.IdPersonnage);
                     var levelUpQuete = await _context.LevelUpQuetes.FirstOrDefaultAsync(lq => lq.PersonnageId == personnage.IdPersonnage);
-                    if (ChasseQuete != null)
+                    if (chasseQuete != null)
                     {
-                        if (ChasseQuete.Type.Equals(tuile.Monstre.Type1) || ChasseQuete.Type.Equals(tuile.Monstre.Type2))
+                        if (chasseQuete.Type.Equals(tuile.Monstre.Type1) || chasseQuete.Type.Equals(tuile.Monstre.Type2))
                         {
                             // update le nombre de monstre tue et passe EstComplete a true si quete finie
-
+                            dto.ChasseQuetes = await quetesService.UpdateChasseQuete(chasseQuete);
                         }
                     }
                     if (levelUpQuete != null && dto.LevelUp != null)
                     {
                         // update le status de la quete si le niveau du personnage est >= au niveau objectif
-                        dto.LevelUpQuetes = quetesService.UpdateLevelUpQuete(levelUpQuete, dto.LevelUp.Niveau).Result;
+                        dto.LevelUpQuetes = await quetesService.UpdateLevelUpQuete(levelUpQuete, dto.LevelUp.Niveau);
                     }
                 }
                 var randonneQuete = await _context.RandonneQuetes.FirstOrDefaultAsync(rq => rq.PersonnageId == personnage.IdPersonnage);
                 if (randonneQuete != null)
                 {
-                    dto.RandonneQuetes = quetesService.UpdateRandonneQueteAsync(randonneQuete, dto.PositionX, dto.PositionY).Result;
+                    dto.RandonneQuetes = await quetesService.UpdateRandonneQueteAsync(randonneQuete, dto.PositionX, dto.PositionY);
                 }
                 return dto;
             }
