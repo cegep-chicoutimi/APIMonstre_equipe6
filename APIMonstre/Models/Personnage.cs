@@ -9,7 +9,7 @@ namespace APIMonstre.Models
         public int Niveau { get; set; }
         public int Experience { get; set; }
         public int PointsVie { get; set; }
-        public int PointsVieMax { get; set;}
+        public int PointsVieMax { get; set; }
         public int Force { get; set; }
         public int Defense { get; set; }
         public int PositionX { get; set; }
@@ -17,10 +17,14 @@ namespace APIMonstre.Models
         public int DernierVillageX { get; set; }
         public int DernierVillageY { get; set; }
         public DateTime DateCreation { get; set; }
+
         [ForeignKey("Utilisateur")]
         public int IdUtilisateur { get; set; }
         public Utilisateur Utilisateur { get; set; }
-        
+        public ICollection<ChasseQuetes> ChasseQuetes { get; set; } = new List<ChasseQuetes>();
+        public ICollection<LevelUpQuetes> LevelUpQuetes { get; set; } = new List<LevelUpQuetes>();
+        public ICollection<RandonneQuetes> RandonneQuetes { get; set; } = new List<RandonneQuetes>();
+
         public Personnage(int idUtilisateur)
         {
             Niveau = 1;

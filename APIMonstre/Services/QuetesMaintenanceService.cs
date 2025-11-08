@@ -8,7 +8,7 @@ namespace APIMonstre.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<MonstreMaintenanceService> _logger;
-        private const int CHECK_INTERVAL = 1;
+        private const int CHECK_INTERVAL = 10;
         private const int MIN_MONSTER_TO_KILL = 8;
         private const int MAX_MONSTER_TO_KILL = 15;
         private const int MAX_LEVEL_TO_REACH = 4;
@@ -62,41 +62,39 @@ namespace APIMonstre.Services
             using var scope = _serviceProvider.CreateScope();
             {
                 var context = scope.ServiceProvider.GetRequiredService<MonstreContext>();
+                var personnages = await GetPersonnages(cancellationToken, context);
+                var newChasse = new List<ChasseQuetes>();
+                var newLevelUp = new List<LevelUpQuetes>();
+                var newRando = new List<RandonneQuetes>();
 
-                var personnageList = context.Personnage.ToArray();
-                var chasseQuestList = new List<ChasseQuetes>();
-                var levelUpQuestList = new List<LevelUpQuetes>();
-                var randoQuestList = new List<RandonneQuetes>();
-
-                foreach (var personnage in personnageList) 
+                foreach (var p in personnages)
                 {
-                    var chasseQuest = await context.ChasseQuetes.FirstOrDefaultAsync(q => q.PersonnageId == personnage.IdPersonnage && q.EstComplete == false);
-                    var levelUpQuest = await context.LevelUpQuetes.FirstOrDefaultAsync(q => q.PersonnageId == personnage.IdPersonnage && q.EstComplete == false);
-                    var randoQuest = await context.RandonneQuetes.FirstOrDefaultAsync(q => q.PersonnageId == personnage.IdPersonnage && q.EstComplete == false);
+                    if (p.ChasseQuetes.Count == 0)
+                        newChasse.Add(await GenerateChasseQuetes(context, p.IdPersonnage));
 
-                    if (chasseQuest == null) 
-                    {
-                        var newQuest = await GenerateChasseQuetes(context, personnage.IdPersonnage);
-                        chasseQuestList.Add(newQuest);
-                    }
-                    if (levelUpQuest == null)
-                    {
-                        var newQuest = await GenerateLevelUpQuetes(personnage);
-                        levelUpQuestList.Add(newQuest);
-                    }
-                    if (randoQuest == null)
-                    {
-                        var newQuest = await GenerateRandonneQuetes(context, personnage);
-                        randoQuestList.Add(newQuest);
-                       
-                    }
+                    if (p.LevelUpQuetes.Count == 0)
+                        newLevelUp.Add(await GenerateLevelUpQuetes(p));
+
+                    if (p.RandonneQuetes.Count == 0)
+                        newRando.Add(await GenerateRandonneQuetes(context, p));
                 }
 
-                await context.ChasseQuetes.AddRangeAsync(chasseQuestList);
-                await context.LevelUpQuetes.AddRangeAsync(levelUpQuestList);
-                await context.RandonneQuetes.AddRangeAsync(randoQuestList);
-                await context.SaveChangesAsync();
+                await context.AddRangeAsync(newChasse, cancellationToken);
+                await context.AddRangeAsync(newLevelUp, cancellationToken);
+                await context.AddRangeAsync(newRando, cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
+
             }
+        }
+
+        private async Task<List<Personnage>> GetPersonnages(CancellationToken cancellationToken, MonstreContext context)
+        {
+            var personnages = await context.Personnage
+                .Include(p => p.ChasseQuetes.Where(q => !q.EstComplete))
+                .Include(p => p.LevelUpQuetes.Where(q => !q.EstComplete))
+                .Include(p => p.RandonneQuetes.Where(q => !q.EstComplete))
+                .ToListAsync(cancellationToken);
+            return personnages;
         }
 
         private async Task<RandonneQuetes> GenerateRandonneQuetes(MonstreContext context, Personnage personnage)
@@ -106,7 +104,7 @@ namespace APIMonstre.Services
             {
                 randomTuile = await context.Tuile.ElementAtAsync(Random.Shared.Next(context.Tuile.Count()));
             } while (randomTuile.Type.Equals(TypeTuile.EAU) ||
-            randomTuile.Type.Equals(TypeTuile.MONTAGNE));
+                     randomTuile.Type.Equals(TypeTuile.MONTAGNE));
             
             return new RandonneQuetes { 
                 PersonnageId = personnage.IdPersonnage,

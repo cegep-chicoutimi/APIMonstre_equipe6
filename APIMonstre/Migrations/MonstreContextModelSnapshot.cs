@@ -310,7 +310,7 @@ namespace APIMonstre.Migrations
             modelBuilder.Entity("APIMonstre.Models.ChasseQuetes", b =>
                 {
                     b.HasOne("APIMonstre.Models.Personnage", "Personnage")
-                        .WithMany()
+                        .WithMany("ChasseQuetes")
                         .HasForeignKey("PersonnageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -340,7 +340,7 @@ namespace APIMonstre.Migrations
             modelBuilder.Entity("APIMonstre.Models.LevelUpQuetes", b =>
                 {
                     b.HasOne("APIMonstre.Models.Personnage", "Personnage")
-                        .WithMany()
+                        .WithMany("LevelUpQuetes")
                         .HasForeignKey("PersonnageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -362,7 +362,7 @@ namespace APIMonstre.Migrations
             modelBuilder.Entity("APIMonstre.Models.RandonneQuetes", b =>
                 {
                     b.HasOne("APIMonstre.Models.Personnage", "Personnage")
-                        .WithMany()
+                        .WithMany("RandonneQuetes")
                         .HasForeignKey("PersonnageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -376,6 +376,15 @@ namespace APIMonstre.Migrations
                     b.Navigation("Personnage");
 
                     b.Navigation("Tuile");
+                });
+
+            modelBuilder.Entity("APIMonstre.Models.Personnage", b =>
+                {
+                    b.Navigation("ChasseQuetes");
+
+                    b.Navigation("LevelUpQuetes");
+
+                    b.Navigation("RandonneQuetes");
                 });
 #pragma warning restore 612, 618
         }

@@ -97,10 +97,11 @@ namespace APIMonstre.Controllers
             {
                 await _context.SaveChangesAsync();
 
+                var chasseQuete = await _context.ChasseQuetes.FirstOrDefaultAsync(cq => cq.PersonnageId == personnage.IdPersonnage && cq.EstComplete == false);
+                var levelUpQuete = await _context.LevelUpQuetes.FirstOrDefaultAsync(lq => lq.PersonnageId == personnage.IdPersonnage && lq.EstComplete == false);
+                
                 if (dto.Victoire)
                 {
-                    var chasseQuete = await _context.ChasseQuetes.FirstOrDefaultAsync(cq => cq.PersonnageId == personnage.IdPersonnage);
-                    var levelUpQuete = await _context.LevelUpQuetes.FirstOrDefaultAsync(lq => lq.PersonnageId == personnage.IdPersonnage);
                     if (chasseQuete != null)
                     {
                         if (chasseQuete.Type.Equals(tuile.Monstre.Type1) || chasseQuete.Type.Equals(tuile.Monstre.Type2))
@@ -109,13 +110,21 @@ namespace APIMonstre.Controllers
                             dto.ChasseQuetes = await quetesService.UpdateChasseQuete(chasseQuete);
                         }
                     }
-                    if (levelUpQuete != null && dto.LevelUp != null)
+                    if (levelUpQuete != null)
                     {
-                        // update le status de la quete si le niveau du personnage est >= au niveau objectif
-                        dto.LevelUpQuetes = await quetesService.UpdateLevelUpQuete(levelUpQuete, dto.LevelUp.Niveau);
+                        if (dto.LevelUp != null)
+                        {
+                            // update le status de la quete si le niveau du personnage est >= au niveau objectif
+                            dto.LevelUpQuetes = await quetesService.UpdateLevelUpQuete(levelUpQuete, dto.LevelUp.Niveau);   
+                        }
                     }
                 }
-                var randonneQuete = await _context.RandonneQuetes.FirstOrDefaultAsync(rq => rq.PersonnageId == personnage.IdPersonnage);
+                else
+                {
+                    dto.ChasseQuetes = chasseQuete;
+                    dto.LevelUpQuetes = levelUpQuete;
+                }
+                var randonneQuete = await _context.RandonneQuetes.FirstOrDefaultAsync(rq => rq.PersonnageId == personnage.IdPersonnage && rq.EstComplete == false);
                 if (randonneQuete != null)
                 {
                     dto.RandonneQuetes = await quetesService.UpdateRandonneQueteAsync(randonneQuete, dto.PositionX, dto.PositionY);
