@@ -15,7 +15,7 @@ namespace APIMonstre.Models
 
         internal void UpdateStatus(int niveau)
         {
-            if (NiveauObjectif >= niveau)
+            if (niveau >= NiveauObjectif)
             {
                 EstComplete = true;
             }

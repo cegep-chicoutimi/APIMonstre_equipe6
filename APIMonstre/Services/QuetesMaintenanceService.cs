@@ -116,7 +116,7 @@ namespace APIMonstre.Services
 
         private async Task<LevelUpQuetes> GenerateLevelUpQuetes(Personnage personnage)
         {
-            var levelToGain = personnage.Niveau + Random.Shared.Next(MAX_LEVEL_TO_REACH);
+            var levelToGain = personnage.Niveau + Random.Shared.Next(1,MAX_LEVEL_TO_REACH);
             return new LevelUpQuetes { 
                 PersonnageId = personnage.IdPersonnage,
                 NiveauDepart = personnage.Niveau,
