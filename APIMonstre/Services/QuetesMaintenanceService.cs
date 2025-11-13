@@ -102,9 +102,10 @@ namespace APIMonstre.Services
             Tuile randomTuile;
             do
             {
-                randomTuile = await context.Tuile.ElementAtAsync(Random.Shared.Next(context.Tuile.Count()));
-            } while (randomTuile.Type.Equals(TypeTuile.EAU) ||
-                     randomTuile.Type.Equals(TypeTuile.MONTAGNE));
+                randomTuile = await context.Tuile.OrderBy(t => t.PositionX)
+                    .Skip(Random.Shared.Next(await context.Tuile.CountAsync()))
+                    .FirstAsync();
+            } while (randomTuile.Type is (int)TypeTuile.EAU or (int)TypeTuile.MONTAGNE);
             
             return new RandonneQuetes { 
                 PersonnageId = personnage.IdPersonnage,
