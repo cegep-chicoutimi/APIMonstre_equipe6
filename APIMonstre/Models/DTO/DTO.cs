@@ -162,6 +162,9 @@ namespace APIMonstre.Models.Dto
         public int PositionY { get; set; }
         public int DernierVillageX { get; set; }
         public int DernierVillageY { get; set; }
+        public ICollection<ChasseQuetes> ChasseQuetes { get; set; } = new List<ChasseQuetes>();
+        public ICollection<LevelUpQuetes> LevelUpQuetes { get; set; } = new List<LevelUpQuetes>();
+        public ICollection<RandonneQuetes> RandonneQuetes { get; set; } = new List<RandonneQuetes>();
 
         public PersonnageDto() { }
         public PersonnageDto(Personnage personnage)
@@ -178,6 +181,9 @@ namespace APIMonstre.Models.Dto
             PositionY = personnage.PositionY;
             DernierVillageX = personnage.DernierVillageX;
             DernierVillageY = personnage.DernierVillageY;
+            ChasseQuetes = personnage.ChasseQuetes;
+            LevelUpQuetes = personnage.LevelUpQuetes;
+            RandonneQuetes = personnage.RandonneQuetes;
         }
     }
 

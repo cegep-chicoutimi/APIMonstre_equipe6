@@ -81,6 +81,9 @@ namespace APIMonstre.Controllers
                 }
             }
             var personnage = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == existingUtilisateur.IdUtilisateur);
+            personnage.ChasseQuetes = await _context.ChasseQuetes.Where(cq => cq.PersonnageId == personnage.IdPersonnage && !cq.EstComplete).ToListAsync();
+            personnage.LevelUpQuetes = await _context.LevelUpQuetes.Where(lq => lq.PersonnageId == personnage.IdPersonnage && !lq.EstComplete).ToListAsync();
+            personnage.RandonneQuetes = await _context.RandonneQuetes.Where(rq => rq.PersonnageId == personnage.IdPersonnage && !rq.EstComplete).ToListAsync();
             PersonnageDto personnageDto = new(personnage);
 
             return new LoginResponseDto(existingUtilisateur.IdUtilisateur, existingUtilisateur.Email, existingUtilisateur.Pseudo, personnageDto, existingUtilisateur.estConnecte);

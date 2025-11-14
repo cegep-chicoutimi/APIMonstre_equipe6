@@ -69,13 +69,13 @@ namespace APIMonstre.Services
 
                 foreach (var p in personnages)
                 {
-                    if (p.ChasseQuetes.Count == 0)
+                    if (p.ChasseQuetes.FirstOrDefault(q => q.EstComplete == false) == null)
                         newChasse.Add(await GenerateChasseQuetes(context, p.IdPersonnage));
 
-                    if (p.LevelUpQuetes.Count == 0)
+                    if (p.LevelUpQuetes.FirstOrDefault(q => q.EstComplete == false) == null)
                         newLevelUp.Add(await GenerateLevelUpQuetes(p));
 
-                    if (p.RandonneQuetes.Count == 0)
+                    if (p.RandonneQuetes.FirstOrDefault(q => q.EstComplete == false) == null)
                         newRando.Add(await GenerateRandonneQuetes(context, p));
                 }
 
