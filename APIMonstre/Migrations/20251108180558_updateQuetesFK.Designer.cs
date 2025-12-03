@@ -4,6 +4,7 @@ using APIMonstre.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIMonstre.Migrations
 {
     [DbContext(typeof(MonstreContext))]
-    partial class MonstreContextModelSnapshot : ModelSnapshot
+    [Migration("20251108180558_updateQuetesFK")]
+    partial class updateQuetesFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,9 +33,6 @@ namespace APIMonstre.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdChasseQuetes"));
 
-                    b.Property<DateTime>("DateCreation")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -43,10 +43,6 @@ namespace APIMonstre.Migrations
                     b.Property<int>("NbTue")
                         .HasColumnType("int");
 
-                    b.Property<string>("Nom")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<int>("ObjectifTue")
                         .HasColumnType("int");
 
@@ -56,9 +52,6 @@ namespace APIMonstre.Migrations
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<int>("XpRecompense")
-                        .HasColumnType("int");
 
                     b.HasKey("IdChasseQuetes")
                         .HasName("PrimaryKey_ChasseQuetes");
@@ -103,9 +96,6 @@ namespace APIMonstre.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdLevelUpQuetes"));
 
-                    b.Property<DateTime>("DateCreation")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -119,14 +109,7 @@ namespace APIMonstre.Migrations
                     b.Property<int>("NiveauObjectif")
                         .HasColumnType("int");
 
-                    b.Property<string>("Nom")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<int>("PersonnageId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("XpRecompense")
                         .HasColumnType("int");
 
                     b.HasKey("IdLevelUpQuetes")
@@ -245,19 +228,12 @@ namespace APIMonstre.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdRandonneQuetes"));
 
-                    b.Property<DateTime>("DateCreation")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<bool>("EstComplete")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Nom")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<int>("PersonnageId")
                         .HasColumnType("int");
@@ -266,9 +242,6 @@ namespace APIMonstre.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("TuileY")
-                        .HasColumnType("int");
-
-                    b.Property<int>("XpRecompense")
                         .HasColumnType("int");
 
                     b.HasKey("IdRandonneQuetes")

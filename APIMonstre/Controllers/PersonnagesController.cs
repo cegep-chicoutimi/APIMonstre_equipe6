@@ -121,13 +121,34 @@ namespace APIMonstre.Controllers
                 }
                 else
                 {
-                    dto.ChasseQuetes = chasseQuete;
-                    dto.LevelUpQuetes = levelUpQuete;
+                    dto.ChasseQuetes = new (chasseQuete);
+                    dto.LevelUpQuetes = new (levelUpQuete);
                 }
                 var randonneQuete = await _context.RandonneQuetes.FirstOrDefaultAsync(rq => rq.PersonnageId == personnage.IdPersonnage && rq.EstComplete == false);
                 if (randonneQuete != null)
                 {
                     dto.RandonneQuetes = await quetesService.UpdateRandonneQueteAsync(randonneQuete, dto.PositionX, dto.PositionY);
+
+                    // si la randonnee vient d'être complétée et a une récompense XP, l'appliquer et re-vérifier une LevelUpQuete
+                    if (dto.RandonneQuetes.EstComplete && randonneQuete.XpRecompense > 0)
+                    {
+                        var levelUpFromRando = CombatService.AppliquerExperience(personnage, randonneQuete.XpRecompense);
+
+                        _context.Entry(personnage).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
+
+                        if (levelUpFromRando != null)
+                        {
+                            dto.LevelUp = levelUpFromRando;
+
+                            // recharger et re-évaluer la LevelUpQuete si elle existe
+                            levelUpQuete = await _context.LevelUpQuetes.FirstOrDefaultAsync(lq => lq.PersonnageId == personnage.IdPersonnage && lq.EstComplete == false);
+                            if (levelUpQuete != null)
+                            {
+                                dto.LevelUpQuetes = await quetesService.UpdateLevelUpQuete(levelUpQuete, personnage.Niveau);
+                            }
+                        }
+                    }
                 }
                 return dto;
             }

@@ -13,7 +13,7 @@ namespace APIMonstre.Services
             _context = context;
         }
 
-        public async Task<ChasseQuetes> UpdateChasseQuete(ChasseQuetes chasseQuete)
+        public async Task<ChasseQuetesDto> UpdateChasseQuete(ChasseQuetes chasseQuete)
         {
             chasseQuete.NbTue += 1;
             chasseQuete.UpdateStatus();
@@ -21,10 +21,12 @@ namespace APIMonstre.Services
             _context.Update(chasseQuete);
             await _context.SaveChangesAsync();
 
-            return chasseQuete;
+            return new(chasseQuete) { 
+                MessageFin = chasseQuete.EstComplete ? "Félicitations ! Vous avez terminé la quête de chasse." : null
+            };
         }
 
-        public async Task<LevelUpQuetes> UpdateLevelUpQuete(LevelUpQuetes levelUpQuete, int niveau)
+        public async Task<LevelUpQuetesDto> UpdateLevelUpQuete(LevelUpQuetes levelUpQuete, int niveau)
         {
             levelUpQuete.UpdateStatus(niveau);
 
@@ -34,10 +36,12 @@ namespace APIMonstre.Services
                 await _context.SaveChangesAsync();
             }
 
-            return levelUpQuete;
+            return new(levelUpQuete) { 
+                MessageFin = levelUpQuete.EstComplete ? "Félicitations ! Vous avez atteint le niveau objectif de la quête." : null
+            };
         }
 
-        public async Task<RandonneQuetes> UpdateRandonneQueteAsync(RandonneQuetes randonneQuete, int positionX, int positionY)
+        public async Task<RandonneQuetesDto> UpdateRandonneQueteAsync(RandonneQuetes randonneQuete, int positionX, int positionY)
         {
             randonneQuete.UpdateStatus(positionX, positionY);
             if (randonneQuete.EstComplete) 
@@ -46,7 +50,9 @@ namespace APIMonstre.Services
                 await _context.SaveChangesAsync();
             }
 
-            return randonneQuete;
+            return new(randonneQuete) { 
+                MessageFin = randonneQuete.EstComplete ? "Félicitations ! Vous avez terminé la quête de randonnée." : null
+            };
         }
     }
 }

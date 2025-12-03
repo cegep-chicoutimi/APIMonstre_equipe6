@@ -101,9 +101,9 @@ namespace APIMonstre.Models.Dto
         public bool Victoire { get; set; } 
         public bool Defaite { get; set; }
         public PersonnageLevelUpDto? LevelUp { get; set; } = null;
-        public ChasseQuetes? ChasseQuetes { get; set; }
-        public LevelUpQuetes? LevelUpQuetes { get; set; }
-        public RandonneQuetes? RandonneQuetes { get; set; }
+        public ChasseQuetesDto? ChasseQuetes { get; set; }
+        public LevelUpQuetesDto? LevelUpQuetes { get; set; }
+        public RandonneQuetesDto? RandonneQuetes { get; set; }
 
         public PersonnageInfosCombatDto() { }
 
@@ -203,49 +203,72 @@ namespace APIMonstre.Models.Dto
 public class ChasseQuetesDto
 {
     public int NbTue { get; set; } = 0;
+    public string Nom { get; set; }
     public int ObjectifTue { get; set; }
     public string Description { get; set; }
     public bool EstComplete { get; set; } = false;
+    public int XpRecompense { get; set; }
     public string? MessageFin { get; set; }
 
-    public ChasseQuetesDto(int nbTue, int objectifTue, string description, bool estComplete) {
-        NbTue = nbTue;
-        ObjectifTue = objectifTue;
-        Description = description;
-        EstComplete = estComplete;
+    public ChasseQuetesDto(ChasseQuetes quetes) { 
+        NbTue = quetes.NbTue;
+        ObjectifTue = quetes.ObjectifTue;
+        Description = quetes.Description;
+        EstComplete = quetes.EstComplete;
+        Nom = quetes.Nom;
+        XpRecompense = quetes.XpRecompense;
     }
 }
 
 public class LevelUpQuetesDto
 {
+    public string Nom { get; set; }
     public int NiveauDepart { get; set; }
     public int NiveauObjectif { get; set; }
     public string Description { get; set; }
     public bool EstComplete { get; set; } = false;
+    public int XpRecompense { get; set; }
     public string? MessageFin { get; set; }
 
-    public LevelUpQuetesDto(int niveauDepart, int niveauObjectif, string description, bool estComplete)
+    public LevelUpQuetesDto(LevelUpQuetes quetes)
     {
-        NiveauDepart = niveauDepart;
-        NiveauObjectif = niveauObjectif;
-        Description = description;
-        EstComplete = estComplete;
+        NiveauDepart = quetes.NiveauDepart;
+        NiveauObjectif = quetes.NiveauObjectif;
+        Description = quetes.Description;
+        EstComplete = quetes.EstComplete;
+        Nom = quetes.Nom;
+        XpRecompense = quetes.XpRecompense;
     }
 }
 
 public class RandonneQuetesDto
 {
+    public string Nom { get; set; }
     public int TuileX { get; set; }
     public int TuileY { get; set; }
     public string Description { get; set; }
     public bool EstComplete { get; set; } = false;
+    public int XpRecompense { get; set; }
     public string? MessageFin { get; set; }
-
-    public RandonneQuetesDto(int tuileX, int tuileY, string description, bool estComplete)
+    
+    public RandonneQuetesDto(RandonneQuetes quetes)
     {
-        TuileX = tuileX;
-        TuileY = tuileY;
-        Description = description;
-        EstComplete = estComplete;
+        TuileX = quetes.TuileX;
+        TuileY = quetes.TuileY;
+        Description = quetes.Description;
+        EstComplete = quetes.EstComplete;
+        Nom = quetes.Nom;
+        XpRecompense = quetes.XpRecompense;
     }
+}
+
+public class QuetesListDto 
+{
+    public ChasseQuetesDto? ChasseQuetes { get; set; }
+    public LevelUpQuetesDto? LevelUpQuetes { get; set; }
+    public RandonneQuetesDto? RandonneQuetes { get; set; }
+    public DateTime ServerTimeUtc { get; internal set; }
+    public DateTime NextRefreshUtc { get; internal set; }
+
+    public QuetesListDto() { }
 }

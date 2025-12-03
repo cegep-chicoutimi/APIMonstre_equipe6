@@ -25,6 +25,7 @@ public class Program
         });
 
         builder.Services.AddHostedService<MonstreMaintenanceService>();
+        builder.Services.AddSingleton<QuetesState>();
         builder.Services.AddHostedService<QuetesMaintenanceService>();
 
         // Add services to the container.

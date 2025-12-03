@@ -55,7 +55,7 @@ namespace APIMonstre.Services
                         SeuilsExperienceProchainNiveau = seuilsExperience[personnage.Niveau]
                     });
                 }
-                
+
                 return new PersonnageInfosCombatDto(personnage, victoire = true, defaite = false, null);
             }
 
@@ -83,6 +83,39 @@ namespace APIMonstre.Services
             }
 
             return false;
+        }
+
+        // Nouvelle méthode : applique de l'expérience au personnage et retourne un DTO de level-up si survenu
+        public static PersonnageLevelUpDto? AppliquerExperience(Personnage personnage, int xp)
+        {
+            if (xp <= 0) return null;
+
+            personnage.Experience += xp;
+            bool leveled = false;
+
+            // Boucle au cas où plusieurs niveaux seraient gagnés
+            while (personnage.Niveau < seuilsExperience.Length && personnage.Experience >= seuilsExperience[personnage.Niveau])
+            {
+                personnage.Niveau++;
+                personnage.Force++;
+                personnage.Defense++;
+                personnage.PointsVieMax++;
+                personnage.PointsVie = personnage.PointsVieMax;
+                personnage.Experience = 0;
+                leveled = true;
+            }
+
+            if (!leveled) return null;
+
+            int nextSeuil = personnage.Niveau < seuilsExperience.Length ? seuilsExperience[personnage.Niveau] : int.MaxValue;
+            return new PersonnageLevelUpDto
+            {
+                Niveau = personnage.Niveau,
+                PointsVieMax = personnage.PointsVieMax,
+                Force = personnage.Force,
+                Defense = personnage.Defense,
+                SeuilsExperienceProchainNiveau = nextSeuil
+            };
         }
     }
 }
