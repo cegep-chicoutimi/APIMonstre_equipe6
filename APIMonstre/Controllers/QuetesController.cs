@@ -38,9 +38,9 @@ namespace APIMonstre.Controllers
 
             var dto = new QuetesListDto
             {
-                ChasseQuetes = new(chasse),
-                LevelUpQuetes = new(levelUp),
-                RandonneQuetes = new(rando),
+                ChasseQuetes = chasse == null? null : new(chasse),
+                LevelUpQuetes = levelUp == null ? null : new(levelUp),
+                RandonneQuetes = rando == null ? null : new(rando),
                
                 ServerTimeUtc = DateTime.UtcNow,
                 NextRefreshUtc = _state.NextRefreshUtc

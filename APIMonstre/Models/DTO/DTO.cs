@@ -264,9 +264,9 @@ public class RandonneQuetesDto
 
 public class QuetesListDto 
 {
-    public ChasseQuetesDto? ChasseQuetes { get; set; }
-    public LevelUpQuetesDto? LevelUpQuetes { get; set; }
-    public RandonneQuetesDto? RandonneQuetes { get; set; }
+    public ChasseQuetesDto? ChasseQuetes { get; set; } = null;
+    public LevelUpQuetesDto? LevelUpQuetes { get; set; } = null;
+    public RandonneQuetesDto? RandonneQuetes { get; set; } = null;
     public DateTime ServerTimeUtc { get; internal set; }
     public DateTime NextRefreshUtc { get; internal set; }
 
