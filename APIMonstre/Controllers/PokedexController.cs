@@ -23,7 +23,7 @@ namespace APIMonstre.Controllers
         }
 
         // GET: api/Pokedex
-        public async Task<ActionResult<IEnumerable<HuntedMonsterDto>>> GetPokedex([FromBody] PokedexRequestDto request)
+        public async Task<ActionResult<PokedexResponseDto>> GetPokedex([FromBody] PokedexRequestDto request)
         {
             var huntedIds = await _context.HuntedMonster
                 .Where(pm => pm.IdPersonnage == request.IdPersonnage)
@@ -44,7 +44,18 @@ namespace APIMonstre.Controllers
                 query = query.Where(m => m.Name.ToLower().Contains(search));
             }
 
-            var monsters = await query.ToListAsync();
+            // Total avant pagination
+            int totalCount = await query.CountAsync();
+
+            // Apply Pagination
+            int skip = (request.Page - 1) * request.PageSize;
+
+            var monsters = await query
+                .OrderBy(m => m.Name)    // important pour que la pagination soit stable
+                .Skip(skip)
+                .Take(request.PageSize)
+                .ToListAsync();
+
             var result = monsters.Select(m => new HuntedMonsterDto
             {
                 Name = m.Name,
@@ -52,7 +63,14 @@ namespace APIMonstre.Controllers
                 Hunted = huntedIds.Contains(m.IdMonster)
             }).ToList();
 
-            return Ok(result);
+            // Retourne avec info de pagination
+            return new PokedexResponseDto { 
+                TotalMonstre = totalCount,
+                Page = request.Page,
+                PageSize = request.PageSize,
+                HuntedMonsters = result
+            };
         }
+
     }
 }

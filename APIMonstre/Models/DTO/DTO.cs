@@ -279,6 +279,9 @@ public class PokedexRequestDto
     public string? TypeMonstre { get; set; }
     public bool? Hunted { get; set; }
     public string? recherche { get; set; }
+    public int Page { get; set; } = 1;     // Numéro de page (1 = première page)
+    public int PageSize { get; set; } = 25; // Taille de page par défaut
+
     public PokedexRequestDto() { }
 }
 
@@ -289,4 +292,14 @@ public class HuntedMonsterDto
     public bool Hunted {get; set; }
 
     public HuntedMonsterDto() { }
+}
+
+public class PokedexResponseDto
+{
+    public int TotalMonstre { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public List<HuntedMonsterDto> HuntedMonsters { get; set; }
+
+    public PokedexResponseDto() { }
 }
