@@ -23,6 +23,7 @@ namespace APIMonstre.Controllers
         }
 
         // GET: api/Pokedex
+        [HttpGet]
         public async Task<ActionResult<PokedexResponseDto>> GetPokedex([FromBody] PokedexRequestDto request)
         {
             var huntedIds = await _context.HuntedMonster
