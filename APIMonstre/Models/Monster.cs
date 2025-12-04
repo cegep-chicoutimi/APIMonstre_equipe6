@@ -2,6 +2,9 @@
 {
     public class Monster
     {
+        public ICollection<HuntedMonster> PersonnageTueurs { get; set; }
+            = new List<HuntedMonster>();
+
         public int IdMonster { get; set; }
         public int PokemonId { get; set; }
         public string Name { get; set; } = string.Empty;

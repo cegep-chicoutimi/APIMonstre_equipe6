@@ -62,6 +62,20 @@ namespace APIMonstre.Data.Context
                 .WithMany()
                 .HasForeignKey(rq => new {rq.TuileX, rq.TuileY })
                 .HasPrincipalKey(t => new { t.PositionX, t.PositionY });
+
+            modelBuilder.Entity<HuntedMonster>()
+        .HasKey(pm => new { pm.IdPersonnage, pm.IdMonster }); // clé composite
+
+            modelBuilder.Entity<HuntedMonster>()
+                .HasOne(pm => pm.Personnage)
+                .WithMany(p => p.HuntedMonsters)
+                .HasForeignKey(pm => pm.IdPersonnage);
+
+            modelBuilder.Entity<HuntedMonster>()
+                .HasOne(pm => pm.Monster)
+                .WithMany(m => m.PersonnageTueurs)
+                .HasForeignKey(pm => pm.IdMonster);
         }
+        public DbSet<APIMonstre.Models.HuntedMonster> HuntedMonster { get; set; } = default!;
     }
 }

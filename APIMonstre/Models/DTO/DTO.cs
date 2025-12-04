@@ -272,3 +272,21 @@ public class QuetesListDto
 
     public QuetesListDto() { }
 }
+
+public class PokedexRequestDto
+{
+    public int IdPersonnage { get; set; }
+    public string? TypeMonstre { get; set; }
+    public bool? Hunted { get; set; }
+    public string? recherche { get; set; }
+    public PokedexRequestDto() { }
+}
+
+public class HuntedMonsterDto
+{
+    public string Name { get; set; }
+    public string SpriteUrl { get; set; }
+    public bool Hunted {get; set; }
+
+    public HuntedMonsterDto() { }
+}
