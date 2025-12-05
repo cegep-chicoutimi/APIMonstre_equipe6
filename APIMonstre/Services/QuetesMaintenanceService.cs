@@ -152,7 +152,7 @@ namespace APIMonstre.Services
             Monster randomMonster = await context.Monster.ElementAtAsync(Random.Shared.Next(context.Monster.Count()));
             string typeToHunt = randomMonster.Type2 == null
                 ? randomMonster.Type1
-                : (Random.Shared.Next(2) == 1 ? randomMonster.Type1 : randomMonster.Type2);
+                : (Random.Shared.Next(1,2) == 1 ? randomMonster.Type1 : randomMonster.Type2);
 
             var nbToKill = Random.Shared.Next(MIN_MONSTER_TO_KILL, MAX_MONSTER_TO_KILL);
             var xp = XP_TO_EARN[Random.Shared.Next(XP_TO_EARN.Length)];
