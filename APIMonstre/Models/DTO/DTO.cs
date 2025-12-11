@@ -1,4 +1,5 @@
 ﻿using APIMonstre.Data.Context;
+using APIMonstre.Models;
 
 namespace APIMonstre.Models.Dto
 {
@@ -20,6 +21,8 @@ namespace APIMonstre.Models.Dto
         public string Nom { get; set; }
         public string SpriteUrl { get; set; }
         public int Niveau { get; set; }
+        public string Type1 { get; set; }
+        public string Type2 { get; set; }
 
         // Position sur la carte
         public int X { get; set; }
@@ -59,13 +62,15 @@ namespace APIMonstre.Models.Dto
                 Nom = instanceMonstre.Monstre.Name,
                 SpriteUrl = instanceMonstre.Monstre.SpriteURL,
                 Niveau = instanceMonstre.Niveau,
+                Type1 = instanceMonstre.Monstre.Type1,
+                Type2 = instanceMonstre.Monstre.Type2,
                 X = instanceMonstre.PositionX,
                 Y = instanceMonstre.PositionY,
                 PointsVieActuels = instanceMonstre.PointsVieActuels,
                 PointsVieMax = instanceMonstre.PointsVieMax,
                 Attaque = instanceMonstre.CalculerAttaque(),
                 Defense = instanceMonstre.CalculerDefense(),
-                ExperienceDonnee = (instanceMonstre.Monstre.ExperienceBase * instanceMonstre.Niveau * 10),
+                ExperienceDonnee = (instanceMonstre.Monstre.ExperienceBase + instanceMonstre.Niveau) * 10,
                 EstVivant = instanceMonstre.PointsVieActuels > 0
             };
         }
@@ -90,16 +95,23 @@ namespace APIMonstre.Models.Dto
     {
         public int Experience { get; set; }
         public int PointsVie { get; set; }
+        public int PointsVieMax { get; set; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public bool Victoire { get; set; } 
         public bool Defaite { get; set; }
         public PersonnageLevelUpDto? LevelUp { get; set; } = null;
+        public ChasseQuetes? ChasseQuetes { get; set; }
+        public LevelUpQuetes? LevelUpQuetes { get; set; }
+        public RandonneQuetes? RandonneQuetes { get; set; }
+
+        public PersonnageInfosCombatDto() { }
 
         public PersonnageInfosCombatDto(Personnage personnage, bool victoire, bool defaite, PersonnageLevelUpDto? levelUp)
         {
             Experience = personnage.Experience;
             PointsVie = personnage.PointsVie;
+            PointsVieMax = personnage.PointsVieMax;
             PositionX = personnage.PositionX;
             PositionY = personnage.PositionY;
             Victoire = victoire;
@@ -114,5 +126,126 @@ namespace APIMonstre.Models.Dto
         public int Force { get; set; }
         public int Defense { get; set; }
         public int SeuilsExperienceProchainNiveau { get; set; }
+
+        public PersonnageLevelUpDto() { }
+    }
+
+    public class LoginResponseDto
+    {
+        public int IdUtilisateur { get; set; }
+        public string Email { get; set; }
+        public string Pseudo { get; set; }
+        public bool EstConnecte { get; set; }
+        public PersonnageDto Personnage { get; set; }
+
+        public LoginResponseDto() { }
+        public LoginResponseDto(int idUtilisateur, string email, string pseudo, PersonnageDto personnage, bool estConnecte)
+        {
+            IdUtilisateur = idUtilisateur;
+            Email = email;
+            Pseudo = pseudo;
+            Personnage = personnage;
+            EstConnecte = estConnecte;
+        }
+    }
+    public class PersonnageDto
+    {
+        public int IdPersonnage { get; set; }
+        public string Nom { get; set; } = string.Empty;
+        public int Niveau { get; set; }
+        public int Experience { get; set; }
+        public int PointsVie { get; set; }
+        public int PointsVieMax { get; set; }
+        public int Force { get; set; }
+        public int Defense { get; set; }
+        public int PositionX { get; set; }
+        public int PositionY { get; set; }
+        public int DernierVillageX { get; set; }
+        public int DernierVillageY { get; set; }
+        public ICollection<ChasseQuetes> ChasseQuetes { get; set; } = new List<ChasseQuetes>();
+        public ICollection<LevelUpQuetes> LevelUpQuetes { get; set; } = new List<LevelUpQuetes>();
+        public ICollection<RandonneQuetes> RandonneQuetes { get; set; } = new List<RandonneQuetes>();
+
+        public PersonnageDto() { }
+        public PersonnageDto(Personnage personnage)
+        {
+            IdPersonnage = personnage.IdPersonnage;
+            Nom = personnage.Nom;
+            Niveau = personnage.Niveau;
+            Experience = personnage.Experience;
+            PointsVie = personnage.PointsVie;
+            PointsVieMax = personnage.PointsVieMax;
+            Force = personnage.Force;
+            Defense = personnage.Defense;
+            PositionX = personnage.PositionX;
+            PositionY = personnage.PositionY;
+            DernierVillageX = personnage.DernierVillageX;
+            DernierVillageY = personnage.DernierVillageY;
+            ChasseQuetes = personnage.ChasseQuetes;
+            LevelUpQuetes = personnage.LevelUpQuetes;
+            RandonneQuetes = personnage.RandonneQuetes;
+        }
+    }
+
+    public class ExplorerDto
+    {
+        public int[][] Coords { get; set; }
+        public string Email { get; set; }
+        public ExplorerDto() { }
+        public ExplorerDto(int[][] coords, string email)
+        {
+            Coords = coords;
+            Email = email;
+        }
+    }
+}
+
+public class ChasseQuetesDto
+{
+    public int NbTue { get; set; } = 0;
+    public int ObjectifTue { get; set; }
+    public string Description { get; set; }
+    public bool EstComplete { get; set; } = false;
+    public string? MessageFin { get; set; }
+
+    public ChasseQuetesDto(int nbTue, int objectifTue, string description, bool estComplete) {
+        NbTue = nbTue;
+        ObjectifTue = objectifTue;
+        Description = description;
+        EstComplete = estComplete;
+    }
+}
+
+public class LevelUpQuetesDto
+{
+    public int NiveauDepart { get; set; }
+    public int NiveauObjectif { get; set; }
+    public string Description { get; set; }
+    public bool EstComplete { get; set; } = false;
+    public string? MessageFin { get; set; }
+
+    public LevelUpQuetesDto(int niveauDepart, int niveauObjectif, string description, bool estComplete)
+    {
+        NiveauDepart = niveauDepart;
+        NiveauObjectif = niveauObjectif;
+        Description = description;
+        EstComplete = estComplete;
+    }
+}
+
+public class RandonneQuetesDto
+{
+    public int TuileX { get; set; }
+    public int TuileY { get; set; }
+    public string Description { get; set; }
+    public bool EstComplete { get; set; } = false;
+    public string? MessageFin { get; set; }
+
+    public RandonneQuetesDto(int tuileX, int tuileY, string description, bool estComplete)
+    {
+        TuileX = tuileX;
+        TuileY = tuileY;
+        Description = description;
+        EstComplete = estComplete;
     }
 }

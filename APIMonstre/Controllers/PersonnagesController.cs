@@ -18,10 +18,12 @@ namespace APIMonstre.Controllers
     {
         private readonly MonstreContext _context;
         private const int GRID_MIN = 0, GRID_MAX = 49;
+        private readonly QuetesService quetesService;
 
         public PersonnagesController(MonstreContext context)
         {
             _context = context;
+            quetesService = new QuetesService(context);
         }
 
         [HttpGet]
@@ -33,20 +35,23 @@ namespace APIMonstre.Controllers
             {
                 return NotFound();
             }
-            TuileAvecInfosDto tuile;
             int newX = 0, newY = 0;
-            switch (direction)
+            switch (direction.ToLower().Trim())
             {
                 case "up":
+                case "haut":
                     newY--;
                     break;
                 case "down":
+                case "bas":
                     newY++;
                     break;
                 case "left":
+                case "gauche":
                     newX--;
                     break;
                 case "right":
+                case "droite":
                     newX++;
                     break;
                 default:
@@ -60,8 +65,8 @@ namespace APIMonstre.Controllers
                 return BadRequest();
             }
 
-            tuile = new TuilesController(_context).GetTuile(personnage.PositionX + newX, personnage.PositionY + newY).Result.Value;
-
+            TuileAvecInfosDto tuile = TuileAvecInfosDto.ConvertirTuileVersDto(_context.Tuile.Where(t => t.PositionX == personnage.PositionX + newX && t.PositionY == personnage.PositionY + newY).FirstOrDefault(), _context);
+            
             if (!tuile.EstAccessible)
             {
                 return BadRequest();
@@ -77,13 +82,13 @@ namespace APIMonstre.Controllers
             }
             if (tuile.Monstre != null)
             {
-                dto = CombatService.Combattre(personnage, tuile, _context);
+                dto = CombatService.Combattre(personnage, tuile, _context); 
             }
             else
             {
                 personnage.PositionX = tuile.PositionX;
                 personnage.PositionY = tuile.PositionY;
-                dto = new(personnage, false, false, null);
+                dto = new PersonnageInfosCombatDto(personnage, false, false, null);
             }
 
             _context.Entry(personnage).State = EntityState.Modified;
@@ -91,6 +96,40 @@ namespace APIMonstre.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                var chasseQuete = await _context.ChasseQuetes.FirstOrDefaultAsync(cq => cq.PersonnageId == personnage.IdPersonnage && cq.EstComplete == false);
+                var levelUpQuete = await _context.LevelUpQuetes.FirstOrDefaultAsync(lq => lq.PersonnageId == personnage.IdPersonnage && lq.EstComplete == false);
+                
+                if (dto.Victoire)
+                {
+                    if (chasseQuete != null)
+                    {
+                        if (chasseQuete.Type.Equals(tuile.Monstre.Type1) || chasseQuete.Type.Equals(tuile.Monstre.Type2))
+                        {
+                            // update le nombre de monstre tue et passe EstComplete a true si quete finie
+                            dto.ChasseQuetes = await quetesService.UpdateChasseQuete(chasseQuete);
+                        }
+                    }
+                    if (levelUpQuete != null)
+                    {
+                        if (dto.LevelUp != null)
+                        {
+                            // update le status de la quete si le niveau du personnage est >= au niveau objectif
+                            dto.LevelUpQuetes = await quetesService.UpdateLevelUpQuete(levelUpQuete, dto.LevelUp.Niveau);   
+                        }
+                    }
+                }
+                else
+                {
+                    dto.ChasseQuetes = chasseQuete;
+                    dto.LevelUpQuetes = levelUpQuete;
+                }
+                var randonneQuete = await _context.RandonneQuetes.FirstOrDefaultAsync(rq => rq.PersonnageId == personnage.IdPersonnage && rq.EstComplete == false);
+                if (randonneQuete != null)
+                {
+                    dto.RandonneQuetes = await quetesService.UpdateRandonneQueteAsync(randonneQuete, dto.PositionX, dto.PositionY);
+                }
+                return dto;
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -104,16 +143,22 @@ namespace APIMonstre.Controllers
                 }
             }
 
-            return dto;
+            
+        }
+
+        private void UpdateQuetes(PersonnageInfosCombatDto dto)
+        {
+            
+            throw new NotImplementedException();
         }
 
         // GET: api/Personnages
-        [HttpGet]
-        [Route("{idUtilisateur}")]
-        public async Task<ActionResult<IEnumerable<Personnage>>> GetPersonnages(int idUtilisateur)
-        {
-            return await _context.Personnage.Where(p => p.IdUtilisateur == idUtilisateur).ToListAsync();
-        }
+        //[HttpGet]
+        //[Route("{idUtilisateur}")]
+        //public async Task<ActionResult<IEnumerable<Personnage>>> GetPersonnages(int idUtilisateur)
+        //{
+        //    return await _context.Personnage.Where(p => p.IdUtilisateur == idUtilisateur).ToListAsync();
+        //}
 
         // GET: api/Personnages/5
         //[HttpGet("{id}")]

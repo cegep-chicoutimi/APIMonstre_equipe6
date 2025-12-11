@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using APIMonstre.Data.Context;
+using APIMonstre.Models;
+using APIMonstre.Models.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using APIMonstre.Data.Context;
-using APIMonstre.Models;
-using APIMonstre.Models.Dto;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mail;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace APIMonstre.Controllers
 {
@@ -24,7 +26,7 @@ namespace APIMonstre.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<ActionResult<Utilisateur>> Register([FromBody] RegisterRequestDto request)
+        public async Task<ActionResult<LoginResponseDto>> Register([FromBody] RegisterRequestDto request)
         {
             var existingUtilisateur = await _context.Utilisateur.FirstOrDefaultAsync(u => u.Email == request.Email);
 
@@ -32,25 +34,33 @@ namespace APIMonstre.Controllers
             {
                 return BadRequest();
             }
-            Utilisateur utilisateur = new Utilisateur() { Email = request.Email, Pseudo = request.Pseudo, MotDePasse = request.Password, DateInscription = DateTime.Now };
+            Utilisateur utilisateur = new Utilisateur() { Email = request.Email, Pseudo = request.Pseudo, MotDePasse = request.Password, DateInscription = DateTime.Now, estConnecte = true};
             _context.Add(utilisateur);
             await _context.SaveChangesAsync();
             utilisateur = await _context.Utilisateur.FirstOrDefaultAsync(_ => _.Email == request.Email);
             _context.Add(new Personnage(utilisateur.IdUtilisateur));
             await _context.SaveChangesAsync();
+            var personnage = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == utilisateur.IdUtilisateur);
 
-            return CreatedAtAction("GetUtilisateur", new { id = utilisateur.IdUtilisateur }, utilisateur);
+            PersonnageDto personnageDto = new(personnage);
+
+            return new LoginResponseDto(utilisateur.IdUtilisateur, utilisateur.Email, utilisateur.Pseudo, personnageDto, utilisateur.estConnecte);
         }
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult<Utilisateur>> Login([FromBody] LoginRequestDto request)
+        public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto request)
         {
+            if(string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            {
+                return BadRequest("Email et mot de passe sont requis.");
+            }
+
             var existingUtilisateur = await _context.Utilisateur.FirstOrDefaultAsync(u => u.Email == request.Email && u.MotDePasse == request.Password);
 
             if (existingUtilisateur == null)
             {
-                return NotFound();
+                return Unauthorized();
             }
             existingUtilisateur.estConnecte = true;
             _context.Entry(existingUtilisateur).State = EntityState.Modified;
@@ -70,8 +80,13 @@ namespace APIMonstre.Controllers
                     throw;
                 }
             }
+            var personnage = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == existingUtilisateur.IdUtilisateur);
+            personnage.ChasseQuetes = await _context.ChasseQuetes.Where(cq => cq.PersonnageId == personnage.IdPersonnage && !cq.EstComplete).ToListAsync();
+            personnage.LevelUpQuetes = await _context.LevelUpQuetes.Where(lq => lq.PersonnageId == personnage.IdPersonnage && !lq.EstComplete).ToListAsync();
+            personnage.RandonneQuetes = await _context.RandonneQuetes.Where(rq => rq.PersonnageId == personnage.IdPersonnage && !rq.EstComplete).ToListAsync();
+            PersonnageDto personnageDto = new(personnage);
 
-            return existingUtilisateur;
+            return new LoginResponseDto(existingUtilisateur.IdUtilisateur, existingUtilisateur.Email, existingUtilisateur.Pseudo, personnageDto, existingUtilisateur.estConnecte);
         }
 
         [HttpPost]
@@ -107,18 +122,18 @@ namespace APIMonstre.Controllers
         }
 
         // GET: api/Utilisateurs/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Utilisateur>> GetUtilisateur(int id)
-        {
-            var utilisateur = await _context.Utilisateur.FindAsync(id);
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<Utilisateur>> GetUtilisateur(int id)
+        //{
+        //    var utilisateur = await _context.Utilisateur.FindAsync(id);
 
-            if (utilisateur == null)
-            {
-                return NotFound();
-            }
+        //    if (utilisateur == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return utilisateur;
-        }
+        //    return utilisateur;
+        //}
 
         //// PUT: api/Utilisateurs/5
         //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

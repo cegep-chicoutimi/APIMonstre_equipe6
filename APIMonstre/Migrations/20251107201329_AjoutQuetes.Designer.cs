@@ -4,6 +4,7 @@ using APIMonstre.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIMonstre.Migrations
 {
     [DbContext(typeof(MonstreContext))]
-    partial class MonstreContextModelSnapshot : ModelSnapshot
+    [Migration("20251107201329_AjoutQuetes")]
+    partial class AjoutQuetes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -310,7 +313,7 @@ namespace APIMonstre.Migrations
             modelBuilder.Entity("APIMonstre.Models.ChasseQuetes", b =>
                 {
                     b.HasOne("APIMonstre.Models.Personnage", "Personnage")
-                        .WithMany("ChasseQuetes")
+                        .WithMany()
                         .HasForeignKey("PersonnageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -340,7 +343,7 @@ namespace APIMonstre.Migrations
             modelBuilder.Entity("APIMonstre.Models.LevelUpQuetes", b =>
                 {
                     b.HasOne("APIMonstre.Models.Personnage", "Personnage")
-                        .WithMany("LevelUpQuetes")
+                        .WithMany()
                         .HasForeignKey("PersonnageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -362,7 +365,7 @@ namespace APIMonstre.Migrations
             modelBuilder.Entity("APIMonstre.Models.RandonneQuetes", b =>
                 {
                     b.HasOne("APIMonstre.Models.Personnage", "Personnage")
-                        .WithMany("RandonneQuetes")
+                        .WithMany()
                         .HasForeignKey("PersonnageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -376,15 +379,6 @@ namespace APIMonstre.Migrations
                     b.Navigation("Personnage");
 
                     b.Navigation("Tuile");
-                });
-
-            modelBuilder.Entity("APIMonstre.Models.Personnage", b =>
-                {
-                    b.Navigation("ChasseQuetes");
-
-                    b.Navigation("LevelUpQuetes");
-
-                    b.Navigation("RandonneQuetes");
                 });
 #pragma warning restore 612, 618
         }

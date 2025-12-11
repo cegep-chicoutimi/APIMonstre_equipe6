@@ -1,9 +1,12 @@
 ﻿using APIMonstre.Data.Context;
 using APIMonstre.Models;
+using APIMonstre.Models.Dto;
+using APIMonstre.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Collections.Generic;
-using APIMonstre.Models.Dto;
 
 namespace APIMonstre.Controllers
 {
@@ -19,30 +22,35 @@ namespace APIMonstre.Controllers
         }
 
         // GET: api/Tuiles
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tuile>>> GetTuile()
-        {
-            return await _context.Tuile.ToListAsync();
-        }
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Tuile>>> GetTuiles()
+        //{
+        //    return await _context.Tuile.ToListAsync();
+        //}
 
         [HttpPost]
         [Route("explorer")]
-        public async Task<ActionResult<TuileAvecInfosDto[]>> GetTuiles([FromBody] int[][] coords)
+        public async Task<ActionResult<TuileAvecInfosDto[]>> GetTuiles([FromBody] ExplorerDto explorerDto)
         {
             var tuiles = new List<Tuile>();
             var tuilesDto = new List<TuileAvecInfosDto>();
-            if(coords.Length > 9)
+
+            if (explorerDto.Coords.Length > 9)
             {
                 return Forbid();
             }
-            if (!AllCoordsAdjacent(coords))
+            if (!AllCoordsAdjacent(explorerDto.Coords))
             {
                 return BadRequest();
             }
-
-            for(int i = 0; i < coords.Length; i++)
+            ActionResult reponse = VerificationUtilisateur(explorerDto.Email);
+            if (reponse is not OkObjectResult okReponse)
             {
-                tuiles.AddRange(await _context.Tuile.Where(t => t.PositionX == coords[i][0] && t.PositionY == coords[i][1]).ToListAsync());
+                return reponse;
+            }
+            for (int i = 0; i < explorerDto.Coords.Length; i++)
+            {
+                tuiles.AddRange(await _context.Tuile.Where(t => t.PositionX == explorerDto.Coords[i][0] && t.PositionY == explorerDto.Coords[i][1]).ToListAsync());
             }
             foreach(Tuile tuile in tuiles)
             {
@@ -84,13 +92,20 @@ namespace APIMonstre.Controllers
         }
 
         // GET: api/Tuiles/5
-        [HttpGet("{x}/{y}")]
-        public async Task<ActionResult<TuileAvecInfosDto>> GetTuile(int x, int y)
+        [HttpPost("{x}/{y}")]
+        public async Task<ActionResult<TuileAvecInfosDto>> GetTuile([FromBody]string email, int x, int y)
         {
             if (x < 0 || x >= 50 || y < 0 || y >= 50)
             {
-                return BadRequest("Les coordonnées doivent être comprises entre 0 et 49 (monde 50x50).");
+                return StatusCode(403, "Les coordonnées doivent être comprises entre 0 et 49 (monde 50x50).");
             }
+
+            ActionResult reponse = VerificationUtilisateur(email);
+            if (reponse is not OkObjectResult okReponse)
+            {
+                return reponse;
+            }
+            Personnage personnage = okReponse.Value as Personnage;
 
             var tuile = await _context.Tuile.Where(t => t.PositionX == x && t.PositionY == y).FirstOrDefaultAsync();
 
@@ -101,6 +116,10 @@ namespace APIMonstre.Controllers
 
                 _context.Tuile.Add(tuile);
                 await _context.SaveChangesAsync();
+            }
+            if(!(Math.Abs(tuile.PositionX - personnage.PositionX) <= 2) || !(Math.Abs(tuile.PositionY - personnage.PositionY) <= 2))
+            {
+                return StatusCode(403, "La tuile demandée n'est pas à portée du personnage.");
             }
 
             return TuileAvecInfosDto.ConvertirTuileVersDto(tuile, _context);
@@ -119,63 +138,78 @@ namespace APIMonstre.Controllers
             return list ?? new List<Tuile>();
         }
 
-
-
+        private ActionResult VerificationUtilisateur(string email)
+        {
+            Utilisateur? user = _context.Utilisateur.FirstOrDefault(u => u.Email == email);
+            if (user == null)
+            {
+                return NotFound("Utilisateur non trouvé.");
+            }
+            Personnage? perso = _context.Personnage.FirstOrDefault(p => p.IdUtilisateur == user.IdUtilisateur);
+            if (perso == null)
+            {
+                return NotFound("Personnage non trouvé pour cet utilisateur.");
+            }
+            if (!user.estConnecte) {
+                return Unauthorized("Utilisateur non connecté");
+            }
+            return Ok(perso);
+        }
         // PUT: api/Tuiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTuile(int id, Tuile tuile)
-        {
-            if (id != tuile.PositionX)
-            {
-                return BadRequest();
-            }
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutTuile(int id, Tuile tuile)
+        //{
+        //    if (id != tuile.PositionX)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            _context.Entry(tuile).State = EntityState.Modified;
+        //    _context.Entry(tuile).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TuileExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!TuileExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         // POST: api/Tuiles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Tuile>> PostTuile(Tuile tuile)
-        {
-            _context.Tuile.Add(tuile);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (TuileExists(tuile.PositionX))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //[HttpPost]
+        //public async Task<ActionResult<Tuile>> PostTuile(Tuile tuile)
+        //{
+        //    _context.Tuile.Add(tuile);
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        if (TuileExists(tuile.PositionX))
+        //        {
+        //            return Conflict();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return CreatedAtAction("GetTuile", new { id = tuile.PositionX }, tuile);
-        }
+        //    return CreatedAtAction("GetTuile", new { id = tuile.PositionX }, tuile);
+        //}
 
         // DELETE: api/Tuiles/5
         /**[HttpDelete("{id}")]
