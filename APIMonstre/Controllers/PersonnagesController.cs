@@ -102,6 +102,9 @@ namespace APIMonstre.Controllers
                 
                 if (dto.Victoire)
                 {
+                    // recupere des pieces d'or en fonction du niveau du monstre
+                    int piecesOrGagnees = tuile.Monstre.Niveau * 3;
+                    personnage.PiecesOr += piecesOrGagnees;
                     if (chasseQuete != null)
                     {
                         if (chasseQuete.Type.Equals(tuile.Monstre.Type1) || chasseQuete.Type.Equals(tuile.Monstre.Type2))
@@ -165,6 +168,56 @@ namespace APIMonstre.Controllers
             }
 
             
+        }
+
+        [HttpGet]
+        [Route("Classement/{ordre}")]
+        public async Task<IEnumerable<LigneClassementDto>> ClassementPersonnage(string ordre)
+        { 
+            var classement = await _context.Personnage.ToListAsync();
+
+            switch (ordre) { 
+                case "niveau":
+                    return classement.OrderByDescending(p => p.Niveau)
+                                     .ThenByDescending(p => p.Experience)
+                                     .Select((p, index) => new LigneClassementDto
+                                     {
+                                         Rang = index + 1,
+                                         Pseudo = p.Nom,
+                                         Valeur = p.Niveau
+                                     }).Take(10)
+                                     .ToList();
+                   
+                case "force":
+                    return classement.OrderByDescending(p => p.Force)
+                                     .ThenByDescending(p => p.Niveau)
+                                     .Select((p, index) => new LigneClassementDto
+                                     {
+                                         Rang = index + 1,
+                                         Pseudo = p.Nom,
+                                         Valeur = p.Force
+                                     }).Take(10)
+                                     .ToList();
+                case "HuntedMonster":
+                    return classement.OrderByDescending(p => p.HuntedMonsters.Count)
+                                     .ThenByDescending(p => p.Niveau)
+                                     .Select((p, index) => new LigneClassementDto
+                                     {
+                                         Rang = index + 1,
+                                         Pseudo = p.Nom,
+                                         Valeur = p.HuntedMonsters.Count
+                                     }).Take(10)
+                                     .ToList();
+            }
+
+            var dtoClassement = classement.Select((p, index) => new LigneClassementDto
+            {
+                Rang = index + 1,
+                Pseudo = p.Nom,
+                Valeur = p.Niveau
+            }).Take(10);
+
+            return dtoClassement;
         }
 
         private void UpdateQuetes(PersonnageInfosCombatDto dto)

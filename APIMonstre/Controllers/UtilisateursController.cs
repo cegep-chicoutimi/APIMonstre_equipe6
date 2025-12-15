@@ -41,8 +41,11 @@ namespace APIMonstre.Controllers
             _context.Add(new Personnage(utilisateur.IdUtilisateur));
             await _context.SaveChangesAsync();
             var personnage = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == utilisateur.IdUtilisateur);
+            var chasse = personnage.ChasseQuetes.Where(cq => cq.EstComplete == false).FirstOrDefault();
+            var levelUp = personnage.LevelUpQuetes.Where(lq => lq.EstComplete == false).FirstOrDefault();
+            var rando = personnage.RandonneQuetes.Where(rq => rq.EstComplete == false).FirstOrDefault();
 
-            PersonnageDto personnageDto = new(personnage);
+            PersonnageDto personnageDto = new(personnage, chasse, rando, levelUp);
 
             return new LoginResponseDto(utilisateur.IdUtilisateur, utilisateur.Email, utilisateur.Pseudo, personnageDto, utilisateur.estConnecte);
         }
@@ -84,7 +87,11 @@ namespace APIMonstre.Controllers
             personnage.ChasseQuetes = await _context.ChasseQuetes.Where(cq => cq.PersonnageId == personnage.IdPersonnage && !cq.EstComplete).ToListAsync();
             personnage.LevelUpQuetes = await _context.LevelUpQuetes.Where(lq => lq.PersonnageId == personnage.IdPersonnage && !lq.EstComplete).ToListAsync();
             personnage.RandonneQuetes = await _context.RandonneQuetes.Where(rq => rq.PersonnageId == personnage.IdPersonnage && !rq.EstComplete).ToListAsync();
-            PersonnageDto personnageDto = new(personnage);
+            var chasse = personnage.ChasseQuetes.Where(cq => cq.EstComplete == false).FirstOrDefault();
+            var levelUp = personnage.LevelUpQuetes.Where(lq => lq.EstComplete == false).FirstOrDefault();
+            var rando = personnage.RandonneQuetes.Where(rq => rq.EstComplete == false).FirstOrDefault();
+
+            PersonnageDto personnageDto = new(personnage, chasse, rando, levelUp);
 
             return new LoginResponseDto(existingUtilisateur.IdUtilisateur, existingUtilisateur.Email, existingUtilisateur.Pseudo, personnageDto, existingUtilisateur.estConnecte);
         }

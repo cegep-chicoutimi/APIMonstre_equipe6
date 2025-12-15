@@ -1,8 +1,11 @@
 ﻿using APIMonstre.Data.Context;
+using APIMonstre.Models;
+using APIMonstre.Models.Dto;
 using APIMonstre.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mono.TextTemplating;
+using System.Threading.Tasks;
 
 namespace APIMonstre.Controllers
 {
@@ -48,5 +51,69 @@ namespace APIMonstre.Controllers
 
             return dto;
         }
+
+        [Route("hint")]
+        [HttpPost()]
+        public async Task<ActionResult<HintResponseDto>> GetChasseQuetes([FromBody] HintRequestDto request)
+        {
+            var personnage = await _context.Personnage.FindAsync(request.IdPersonnage);
+            var posX = personnage.PositionX;
+            var posY = personnage.PositionY;
+            var typeMonstre = request.TypeMonstre;
+
+            if (personnage.PiecesOr < 100)
+            {
+                return BadRequest("Tu n'a pas assez de pièces d'or pour obtenir un indice.");
+            }
+
+            var monstreProche = GetMonstrePlusProche(posX, posY, typeMonstre);
+            if (monstreProche == null)
+            {
+                return NotFound("Aucun monstre de ce type n'a été trouvé proche du personnage.");
+            }
+
+            // prix du hint deduit
+            personnage.PiecesOr -= 100;
+
+            var hint = new TypePositionHint {
+                PositionX = monstreProche.Result.PositionX,
+                PositionY = monstreProche.Result.PositionY,
+                Type = typeMonstre,
+                IdPersonnage = personnage.IdPersonnage
+
+            };
+            await _context.TypePositionHint.AddAsync(hint);
+            await _context.SaveChangesAsync();
+
+            var historyHints = await _context.TypePositionHint
+                .Where(tph => tph.IdPersonnage == request.IdPersonnage)
+                .OrderBy(tph => tph.Id)
+                .Take(3)
+                .ToListAsync();
+
+            var dto = new HintResponseDto
+            {
+                CurrentHint = new HintDto(hint),
+                PiecesOr = personnage.PiecesOr,
+                HistoryHints = historyHints
+                .Select(tph => new HintDto(tph))
+                .ToList()
+            };
+
+            return dto;
+        }
+
+        private async Task<InstanceMonstre?> GetMonstrePlusProche(int posX, int posY, string typeMonstre)
+        {
+            return await _context.InstanceMonstre
+        .Where(im =>
+            im.Monstre.Type1.ToUpper() == typeMonstre.ToUpper() ||
+            im.Monstre.Type2.ToUpper() == typeMonstre.ToUpper())
+        .OrderBy(im =>
+            Math.Abs(im.PositionX - posX) +
+            Math.Abs(im.PositionY - posY))
+        .FirstOrDefaultAsync();
+        }
     }
+    
 }

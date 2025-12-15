@@ -1,5 +1,6 @@
 ﻿using APIMonstre.Data.Context;
 using APIMonstre.Models;
+using System.Security.Cryptography.X509Certificates;
 
 namespace APIMonstre.Models.Dto
 {
@@ -162,12 +163,12 @@ namespace APIMonstre.Models.Dto
         public int PositionY { get; set; }
         public int DernierVillageX { get; set; }
         public int DernierVillageY { get; set; }
-        public ICollection<ChasseQuetes> ChasseQuetes { get; set; } = new List<ChasseQuetes>();
-        public ICollection<LevelUpQuetes> LevelUpQuetes { get; set; } = new List<LevelUpQuetes>();
-        public ICollection<RandonneQuetes> RandonneQuetes { get; set; } = new List<RandonneQuetes>();
+        public ChasseQuetesDto? ChasseQuetes { get; set; }
+        public LevelUpQuetesDto? LevelUpQuetes { get; set; }
+        public RandonneQuetesDto? RandonneQuetes { get; set; }
 
         public PersonnageDto() { }
-        public PersonnageDto(Personnage personnage)
+        public PersonnageDto(Personnage personnage, ChasseQuetes? chasse, RandonneQuetes? randonneQuetes, LevelUpQuetes? levelUpQuetes)
         {
             IdPersonnage = personnage.IdPersonnage;
             Nom = personnage.Nom;
@@ -181,9 +182,9 @@ namespace APIMonstre.Models.Dto
             PositionY = personnage.PositionY;
             DernierVillageX = personnage.DernierVillageX;
             DernierVillageY = personnage.DernierVillageY;
-            ChasseQuetes = personnage.ChasseQuetes;
-            LevelUpQuetes = personnage.LevelUpQuetes;
-            RandonneQuetes = personnage.RandonneQuetes;
+            ChasseQuetes = new ChasseQuetesDto(chasse);
+            LevelUpQuetes = new LevelUpQuetesDto(levelUpQuetes);
+            RandonneQuetes = new RandonneQuetesDto(randonneQuetes);
         }
     }
 
@@ -302,4 +303,42 @@ public class PokedexResponseDto
     public List<HuntedMonsterDto> HuntedMonsters { get; set; }
 
     public PokedexResponseDto() { }
+}
+
+public class HintDto
+{
+    public int IdPersonnage { get; set; }
+    public string TypeMonstre { get; set; }
+    public int PositionX { get; set; }
+    public int PositionY { get; set; }
+    public HintDto() { }
+
+    public HintDto(TypePositionHint tph)
+    {
+        IdPersonnage = tph.IdPersonnage;
+        TypeMonstre = tph.Type;
+        PositionX = tph.PositionX;
+        PositionY = tph.PositionY;
+    }
+}
+public class HintRequestDto
+{
+    public int IdPersonnage { get; set; }
+    public string TypeMonstre { get; set; }
+    public string Email { get; set; }
+    public HintRequestDto() { }
+}
+
+public class HintResponseDto
+{
+    public HintDto CurrentHint { get; set; }
+    public int PiecesOr { get; set; }
+    public List<HintDto> HistoryHints { get; set; }
+}
+
+public class LigneClassementDto
+{
+    public int Rang { get; set; }
+    public string Pseudo { get; set; }
+    public int Valeur { get; set; }
 }
