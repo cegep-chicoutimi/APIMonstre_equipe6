@@ -253,6 +253,7 @@ namespace APIMonstre.Controllers
                 PointsVieMax = personnage.PointsVieMax,
                 Force = personnage.Force,
                 Defense = personnage.Defense,
+                PiecesOr = personnage.PiecesOr,
             };
 
             return PersonnageDto;

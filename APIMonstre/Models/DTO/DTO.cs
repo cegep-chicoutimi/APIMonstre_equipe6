@@ -163,6 +163,7 @@ namespace APIMonstre.Models.Dto
         public int PositionY { get; set; }
         public int DernierVillageX { get; set; }
         public int DernierVillageY { get; set; }
+        public int PiecesOr { get; set; }
         public ChasseQuetesDto? ChasseQuetes { get; set; }
         public LevelUpQuetesDto? LevelUpQuetes { get; set; }
         public RandonneQuetesDto? RandonneQuetes { get; set; }
@@ -182,6 +183,7 @@ namespace APIMonstre.Models.Dto
             PositionY = personnage.PositionY;
             DernierVillageX = personnage.DernierVillageX;
             DernierVillageY = personnage.DernierVillageY;
+            PiecesOr = personnage.PiecesOr;
             ChasseQuetes = new ChasseQuetesDto(chasse);
             LevelUpQuetes = new LevelUpQuetesDto(levelUpQuetes);
             RandonneQuetes = new RandonneQuetesDto(randonneQuetes);
@@ -358,4 +360,5 @@ public class ProfilResponseDto
     public int PointsVieMax { get; set; }
     public int Force { get; set; }
     public int Defense { get; set; }
+    public int PiecesOr { get; set; }
 }
