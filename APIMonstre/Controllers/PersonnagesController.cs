@@ -173,51 +173,79 @@ namespace APIMonstre.Controllers
         [HttpGet]
         [Route("Classement/{ordre}")]
         public async Task<IEnumerable<LigneClassementDto>> ClassementPersonnage(string ordre)
-        { 
-            var classement = await _context.Personnage.ToListAsync();
-
-            switch (ordre) { 
-                case "Niveau":
-                    return classement.OrderByDescending(p => p.Niveau)
-                                     .ThenByDescending(p => p.Experience)
-                                     .Select((p, index) => new LigneClassementDto
-                                     {
-                                         Rang = index + 1,
-                                         Pseudo = p.Nom,
-                                         Valeur = p.Niveau
-                                     }).Take(10)
-                                     .ToList();
-                   
-                case "Force":
-                    return classement.OrderByDescending(p => p.Force)
-                                     .ThenByDescending(p => p.Niveau)
-                                     .Select((p, index) => new LigneClassementDto
-                                     {
-                                         Rang = index + 1,
-                                         Pseudo = p.Nom,
-                                         Valeur = p.Force
-                                     }).Take(10)
-                                     .ToList();
-                case "HuntedMonster":
-                    return classement.OrderByDescending(p => p.HuntedMonsters.Count)
-                                     .ThenByDescending(p => p.Niveau)
-                                     .Select((p, index) => new LigneClassementDto
-                                     {
-                                         Rang = index + 1,
-                                         Pseudo = p.Nom,
-                                         Valeur = p.HuntedMonsters.Count
-                                     }).Take(10)
-                                     .ToList();
-            }
-
-            var dtoClassement = classement.Select((p, index) => new LigneClassementDto
+        {
+            switch (ordre)
             {
-                Rang = index + 1,
-                Pseudo = p.Nom,
-                Valeur = p.Niveau
-            }).Take(10);
+                case "Niveau":
+                {
+                    var top = await _context.Personnage
+                        .OrderByDescending(p => p.Niveau)
+                        .ThenByDescending(p => p.Experience)
+                        .Take(10)
+                        .ToListAsync();
 
-            return dtoClassement;
+                    return top.Select((p, index) => new LigneClassementDto
+                    {
+                        Rang = index + 1,
+                        Pseudo = p.Nom,
+                        Valeur = p.Niveau
+                    });
+                }
+
+                case "Force":
+                {
+                    var top = await _context.Personnage
+                        .OrderByDescending(p => p.Force)
+                        .ThenByDescending(p => p.Niveau)
+                        .Take(10)
+                        .ToListAsync();
+
+                    return top.Select((p, index) => new LigneClassementDto
+                    {
+                        Rang = index + 1,
+                        Pseudo = p.Nom,
+                        Valeur = p.Force
+                    });
+                }
+
+                case "HuntedMonster":
+                {
+                    // Compter côté base et récupérer les top 10 idPersonnage
+                    var topHunted = await _context.HuntedMonster
+                        .GroupBy(h => h.IdPersonnage)
+                        .Select(g => new { IdPersonnage = g.Key, Count = g.Count() })
+                        .OrderByDescending(x => x.Count)
+                        .Take(10)
+                        .ToListAsync();
+
+                    // Récupérer les pseudos correspondants en une requête
+                    var personnagesMap = await _context.Personnage
+                        .Where(p => topHunted.Select(t => t.IdPersonnage).Contains(p.IdPersonnage))
+                        .ToDictionaryAsync(p => p.IdPersonnage, p => p.Nom);
+
+                    return topHunted.Select((x, index) => new LigneClassementDto
+                    {
+                        Rang = index + 1,
+                        Pseudo = personnagesMap.TryGetValue(x.IdPersonnage, out var nom) ? nom : $"#{x.IdPersonnage}",
+                        Valeur = x.Count
+                    }).ToList();
+                }
+
+                default:
+                {
+                    var top = await _context.Personnage
+                        .OrderByDescending(p => p.Niveau)
+                        .Take(10)
+                        .ToListAsync();
+
+                    return top.Select((p, index) => new LigneClassementDto
+                    {
+                        Rang = index + 1,
+                        Pseudo = p.Nom,
+                        Valeur = p.Niveau
+                    });
+                }
+            }
         }
 
         private void UpdateQuetes(PersonnageInfosCombatDto dto)
@@ -320,6 +348,21 @@ namespace APIMonstre.Controllers
         private bool PersonnageExists(int id)
         {
             return _context.Personnage.Any(e => e.IdPersonnage == id);
+        }
+
+        [HttpGet("debug/huntedstats")]
+        public async Task<ActionResult> DebugHuntedStats()
+        {
+            var total = await _context.HuntedMonster.CountAsync();
+            var perPlayer = await _context.HuntedMonster
+                .GroupBy(h => h.IdPersonnage)
+                .Select(g => new { IdPersonnage = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .ToListAsync();
+
+            var sample = await _context.HuntedMonster.Take(20).ToListAsync();
+
+            return Ok(new { total, perPlayer, sample });
         }
     }
 }

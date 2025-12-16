@@ -45,7 +45,7 @@ namespace APIMonstre.Controllers
             var levelUp = personnage.LevelUpQuetes.Where(lq => lq.EstComplete == false).FirstOrDefault();
             var rando = personnage.RandonneQuetes.Where(rq => rq.EstComplete == false).FirstOrDefault();
 
-            PersonnageDto personnageDto = new(personnage, chasse, rando, levelUp);
+            PersonnageDto personnageDto = new(personnage, chasse, rando, levelUp, new List<HintDto>());
 
             return new LoginResponseDto(utilisateur.IdUtilisateur, utilisateur.Email, utilisateur.Pseudo, personnageDto, utilisateur.estConnecte);
         }
@@ -91,7 +91,17 @@ namespace APIMonstre.Controllers
             var levelUp = personnage.LevelUpQuetes.Where(lq => lq.EstComplete == false).FirstOrDefault();
             var rando = personnage.RandonneQuetes.Where(rq => rq.EstComplete == false).FirstOrDefault();
 
-            PersonnageDto personnageDto = new(personnage, chasse, rando, levelUp);
+            var historyHints = await _context.TypePositionHint
+                .Where(tph => tph.IdPersonnage == personnage.IdPersonnage)
+                .OrderByDescending(tph => tph.CreatedAt)
+                .Take(3)
+                .ToListAsync();
+
+            var dtoHints = historyHints
+                .Select(tph => new HintDto(tph))
+                .ToList();
+
+            PersonnageDto personnageDto = new(personnage, chasse, rando, levelUp, dtoHints);
 
             return new LoginResponseDto(existingUtilisateur.IdUtilisateur, existingUtilisateur.Email, existingUtilisateur.Pseudo, personnageDto, existingUtilisateur.estConnecte);
         }

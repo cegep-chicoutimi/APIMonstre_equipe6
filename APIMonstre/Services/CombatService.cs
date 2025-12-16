@@ -36,7 +36,19 @@ namespace APIMonstre.Services
             }
             if (degatsMonstre >= tuile.Monstre.PointsVieActuels)
             {
+                // supprimer l'instance du monstre de la map
                 context.InstanceMonstre.Remove(context.InstanceMonstre.FirstOrDefault(im => im.PositionX == tuile.Monstre.X && im.PositionY == tuile.Monstre.Y));
+
+                // enregistrer le "hunted" pour le personnage (éviter doublons)
+                if (!context.HuntedMonster.Any(h => h.IdPersonnage == personnage.IdPersonnage && h.IdMonster == tuile.Monstre.MonstreId))
+                {
+                    context.HuntedMonster.Add(new HuntedMonster
+                    {
+                        IdPersonnage = personnage.IdPersonnage,
+                        IdMonster = tuile.Monstre.MonstreId
+                    });
+                }
+
                 personnage.Experience += tuile.Monstre.ExperienceDonnee;
 
                 personnage.PositionX = tuile.PositionX;
@@ -55,7 +67,7 @@ namespace APIMonstre.Services
                         SeuilsExperienceProchainNiveau = seuilsExperience[personnage.Niveau]
                     });
                 }
-
+                
                 return new PersonnageInfosCombatDto(personnage, victoire = true, defaite = false, null);
             }
 

@@ -167,9 +167,10 @@ namespace APIMonstre.Models.Dto
         public ChasseQuetesDto? ChasseQuetes { get; set; }
         public LevelUpQuetesDto? LevelUpQuetes { get; set; }
         public RandonneQuetesDto? RandonneQuetes { get; set; }
+        public List<HintDto> Hints { get; set; } = new List<HintDto>();
 
         public PersonnageDto() { }
-        public PersonnageDto(Personnage personnage, ChasseQuetes? chasse, RandonneQuetes? randonneQuetes, LevelUpQuetes? levelUpQuetes)
+        public PersonnageDto(Personnage personnage, ChasseQuetes? chasse, RandonneQuetes? randonneQuetes, LevelUpQuetes? levelUpQuetes, List<HintDto> hints)
         {
             IdPersonnage = personnage.IdPersonnage;
             Nom = personnage.Nom;
@@ -187,6 +188,7 @@ namespace APIMonstre.Models.Dto
             ChasseQuetes = new ChasseQuetesDto(chasse);
             LevelUpQuetes = new LevelUpQuetesDto(levelUpQuetes);
             RandonneQuetes = new RandonneQuetesDto(randonneQuetes);
+            Hints = hints;
         }
     }
 

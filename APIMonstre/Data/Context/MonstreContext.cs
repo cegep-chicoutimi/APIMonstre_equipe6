@@ -14,6 +14,7 @@ namespace APIMonstre.Data.Context
         public DbSet<LevelUpQuetes> LevelUpQuetes {  get; set; }
         public DbSet<RandonneQuetes> RandonneQuetes {  get; set; }
         public DbSet<TypePositionHint> TypePositionHint { get; set; }
+        public DbSet<HuntedMonster> HuntedMonster { get; set; }
 
         public MonstreContext(DbContextOptions<MonstreContext> options) : base(options)
         {
@@ -67,11 +68,11 @@ namespace APIMonstre.Data.Context
                 .HasPrincipalKey(t => new { t.PositionX, t.PositionY });
 
             modelBuilder.Entity<HuntedMonster>()
-        .HasKey(pm => new { pm.IdPersonnage, pm.IdMonster }); // clé composite
+                .HasKey(pm => new { pm.IdPersonnage, pm.IdMonster }); // clé composite
 
             modelBuilder.Entity<HuntedMonster>()
                 .HasOne(pm => pm.Personnage)
-                .WithMany(p => p.HuntedMonsters)
+                .WithMany(p => p.HuntedMonster)
                 .HasForeignKey(pm => pm.IdPersonnage);
 
             modelBuilder.Entity<HuntedMonster>()
@@ -84,6 +85,5 @@ namespace APIMonstre.Data.Context
                .WithMany(p => p.TypePositionHints)
                .HasForeignKey(tph => tph.IdPersonnage);
         }
-        public DbSet<APIMonstre.Models.HuntedMonster> HuntedMonster { get; set; } = default!;
     }
 }

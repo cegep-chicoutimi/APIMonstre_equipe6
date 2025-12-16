@@ -1,4 +1,6 @@
-﻿namespace APIMonstre.Models
+﻿using System;
+
+namespace APIMonstre.Models
 {
     public class TypePositionHint
     {
@@ -8,5 +10,6 @@
         public int PositionY { get; set; }
         public int IdPersonnage { get; set; }
         public Personnage Personnage { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

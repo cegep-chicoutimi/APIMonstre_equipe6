@@ -4,6 +4,7 @@ using APIMonstre.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIMonstre.Migrations
 {
     [DbContext(typeof(MonstreContext))]
-    partial class MonstreContextModelSnapshot : ModelSnapshot
+    [Migration("20251216221046_DateHint")]
+    partial class DateHint
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -407,7 +410,7 @@ namespace APIMonstre.Migrations
                         .IsRequired();
 
                     b.HasOne("APIMonstre.Models.Personnage", "Personnage")
-                        .WithMany("HuntedMonster")
+                        .WithMany("HuntedMonsters")
                         .HasForeignKey("IdPersonnage")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -497,7 +500,7 @@ namespace APIMonstre.Migrations
                 {
                     b.Navigation("ChasseQuetes");
 
-                    b.Navigation("HuntedMonster");
+                    b.Navigation("HuntedMonsters");
 
                     b.Navigation("LevelUpQuetes");
 

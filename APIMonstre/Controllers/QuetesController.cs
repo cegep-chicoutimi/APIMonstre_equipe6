@@ -79,15 +79,15 @@ namespace APIMonstre.Controllers
                 PositionX = monstreProche.Result.PositionX,
                 PositionY = monstreProche.Result.PositionY,
                 Type = typeMonstre,
-                IdPersonnage = personnage.IdPersonnage
-
+                IdPersonnage = personnage.IdPersonnage,
+                CreatedAt = DateTime.UtcNow
             };
             await _context.TypePositionHint.AddAsync(hint);
             await _context.SaveChangesAsync();
 
             var historyHints = await _context.TypePositionHint
                 .Where(tph => tph.IdPersonnage == request.IdPersonnage)
-                .OrderBy(tph => tph.Id)
+                .OrderByDescending(tph => tph.CreatedAt)
                 .Take(3)
                 .ToListAsync();
 

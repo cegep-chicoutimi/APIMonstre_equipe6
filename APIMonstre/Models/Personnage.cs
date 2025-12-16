@@ -25,7 +25,7 @@ namespace APIMonstre.Models
         public ICollection<ChasseQuetes> ChasseQuetes { get; set; } = new List<ChasseQuetes>();
         public ICollection<LevelUpQuetes> LevelUpQuetes { get; set; } = new List<LevelUpQuetes>();
         public ICollection<RandonneQuetes> RandonneQuetes { get; set; } = new List<RandonneQuetes>();
-        public ICollection<HuntedMonster> HuntedMonsters { get; set; }= new List<HuntedMonster>();
+        public ICollection<HuntedMonster> HuntedMonster { get; set; }= new List<HuntedMonster>();
         public ICollection<TypePositionHint> TypePositionHints { get; set; } = new List<TypePositionHint>();
 
         public Personnage(int idUtilisateur, string pseudo)
