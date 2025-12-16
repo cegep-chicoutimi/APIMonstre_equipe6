@@ -28,9 +28,10 @@ namespace APIMonstre.Models
         public ICollection<HuntedMonster> HuntedMonsters { get; set; }= new List<HuntedMonster>();
         public ICollection<TypePositionHint> TypePositionHints { get; set; } = new List<TypePositionHint>();
 
-        public Personnage(int idUtilisateur)
+        public Personnage(int idUtilisateur, string pseudo)
         {
             Niveau = 1;
+            Nom = pseudo;
             Experience = 0;
             PointsVie = 100;
             PointsVieMax = 100;
@@ -43,5 +44,7 @@ namespace APIMonstre.Models
             DernierVillageX = PositionX;
             DernierVillageY = PositionY;
         }
+
+        public Personnage() { }
     }
 }

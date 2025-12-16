@@ -177,7 +177,7 @@ namespace APIMonstre.Controllers
             var classement = await _context.Personnage.ToListAsync();
 
             switch (ordre) { 
-                case "niveau":
+                case "Niveau":
                     return classement.OrderByDescending(p => p.Niveau)
                                      .ThenByDescending(p => p.Experience)
                                      .Select((p, index) => new LigneClassementDto
@@ -188,7 +188,7 @@ namespace APIMonstre.Controllers
                                      }).Take(10)
                                      .ToList();
                    
-                case "force":
+                case "Force":
                     return classement.OrderByDescending(p => p.Force)
                                      .ThenByDescending(p => p.Niveau)
                                      .Select((p, index) => new LigneClassementDto
@@ -226,27 +226,37 @@ namespace APIMonstre.Controllers
             throw new NotImplementedException();
         }
 
-        // GET: api/Personnages
+        //GET: api/Personnages
         //[HttpGet]
         //[Route("{idUtilisateur}")]
-        //public async Task<ActionResult<IEnumerable<Personnage>>> GetPersonnages(int idUtilisateur)
-        //{
-        //    return await _context.Personnage.Where(p => p.IdUtilisateur == idUtilisateur).ToListAsync();
-        //}
+        // public async Task<ActionResult<IEnumerable<Personnage>>> GetPersonnages(int idUtilisateur)
+        // {
+        //     return await _context.Personnage.Where(p => p.IdUtilisateur == idUtilisateur).ToListAsync();
+        // }
 
-        // GET: api/Personnages/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Personnage>> GetPersonnage(int id)
-        //{
-        //    var personnage = await _context.Personnage.FindAsync(id);
+        //GET: api/Personnages/5
+        [HttpPost]
+        public async Task<ActionResult<ProfilResponseDto>> GetPersonnage([FromBody] PersonnageRequestDto request)
+        {
+            var personnage = await _context.Personnage.FindAsync(request.IdPersonnage);
 
-        //    if (personnage == null)
-        //    {
-        //        return NotFound();
-        //    }
+            if (personnage == null)
+            {
+                return NotFound();
+            }
 
-        //    return personnage;
-        //}
+            var PersonnageDto = new ProfilResponseDto() { 
+                Pseudo = personnage.Nom,
+                Niveau = personnage.Niveau,
+                Experience = personnage.Experience,
+                PointsVie = personnage.PointsVie,
+                PointsVieMax = personnage.PointsVieMax,
+                Force = personnage.Force,
+                Defense = personnage.Defense,
+            };
+
+            return PersonnageDto;
+        }
 
         // PUT: api/Personnages/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

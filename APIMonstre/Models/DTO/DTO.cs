@@ -342,3 +342,20 @@ public class LigneClassementDto
     public string Pseudo { get; set; }
     public int Valeur { get; set; }
 }
+
+public class PersonnageRequestDto
+{
+    public int IdPersonnage { get; set; }
+    public string Email { get; set; }
+}
+
+public class ProfilResponseDto
+{
+    public string Pseudo { get; set; }
+    public int Niveau { get; set; }
+    public int Experience { get; set; }
+    public int PointsVie { get; set; }
+    public int PointsVieMax { get; set; }
+    public int Force { get; set; }
+    public int Defense { get; set; }
+}

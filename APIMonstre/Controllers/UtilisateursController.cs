@@ -38,7 +38,7 @@ namespace APIMonstre.Controllers
             _context.Add(utilisateur);
             await _context.SaveChangesAsync();
             utilisateur = await _context.Utilisateur.FirstOrDefaultAsync(_ => _.Email == request.Email);
-            _context.Add(new Personnage(utilisateur.IdUtilisateur));
+            _context.Add(new Personnage(utilisateur.IdUtilisateur, request.Pseudo));
             await _context.SaveChangesAsync();
             var personnage = await _context.Personnage.FirstOrDefaultAsync(p => p.IdUtilisateur == utilisateur.IdUtilisateur);
             var chasse = personnage.ChasseQuetes.Where(cq => cq.EstComplete == false).FirstOrDefault();
